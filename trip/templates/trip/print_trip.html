@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ trip.title }} - Printable Version{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body {
+            font-size: 12pt;
+            background-color: white;
+        }
+        .container {
+            width: 100%;
+            max-width: 100%;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            border: 1px solid #aaa;
+        }
+        h1 {
+            font-size: 24pt;
+            margin-bottom: 0.5cm;
+        }
+        h2 {
+            font-size: 18pt;
+            margin-top: 0.8cm;
+            margin-bottom: 0.3cm;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.2cm;
+        }
+        h3 {
+            font-size: 14pt;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        .card-img-top {
+            max-height: 200px;
+            width: auto;
+            margin: 0 auto;
+        }
+        .trip-header {
+            text-align: center;
+            margin-bottom: 1cm;
+        }
+        .trip-header h1 {
+            color: #2c3e50;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 9pt;
+            color: #777;
+        }
+    }
+    
+    /* Styles for screen view */
+    .print-container {
+        max-width: 210mm;
+        margin: 0 auto;
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .print-heading {
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Controls visible only on screen, not in print -->
+<div class="row mb-4 no-print">
+    <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>{{ trip.title }} - PDF Download</h1>
+            <div>
+                <a href="{% url 'trip:trip_detail' trip_id=trip.id %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left"></i> Back to Trip
+                </a>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Download as PDF
+                </button>
+            </div>
+        </div>
+        <p class="text-muted">This page is formatted for printing or saving as PDF. Use your browser's print function or click the button above.</p>
+        <hr>
+    </div>
+</div>
+
+<!-- Content that will be printed -->
+<div class="print-container">
+    <!-- Trip Header -->
+    <div class="trip-header">
+        <h1>{{ trip.title }}</h1>
+        <p class="lead">{{ trip.start_date|date:"F d, Y" }} - {{ trip.end_date|date:"F d, Y" }} ({{ trip.end_date|timeuntil:trip.start_date }})</p>
+        {% if trip.profile_photo %}
+            <img src="{{ trip.profile_photo.url }}" alt="{{ trip.title }}" style="max-height: 150px; margin: 1rem auto;">
+        {% endif %}
+    </div>
+    
+    <!-- Trip Details Section -->
+    <div class="section">
+        <h2 class="print-heading">Trip Overview</h2>
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th style="width: 25%">Traveler</th>
+                    <td>{{ trip.user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Dates</th>
+                    <td>{{ trip.start_date|date:"F d, Y" }} - {{ trip.end_date|date:"F d, Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Duration</th>
+                    <td>{{ trip.end_date|timeuntil:trip.start_date }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ trip.description|linebreaks }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Itinerary Section with page break for print -->
+    <div class="section page-break">
+        <h2 class="print-heading">Itinerary</h2>
+        {% if itinerary_items %}
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Activity</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itinerary_items %}
+                        <tr>
+                            <td>{{ item.date|date:"M d, Y" }}</td>
+                            <td>{{ item.time|time:"g:i A" }}</td>
+                            <td>{{ item.activity }}</td>
+                            <td>{{ item.location }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No itinerary items have been added to this trip.</p>
+        {% endif %}
+    </div>
+
+    <!-- Budget Section -->
+    <div class="section">
+        <h2 class="print-heading">Budget</h2>
+        {% if budget_items %}
+            <div class="alert alert-info mb-3">
+                <h3>Total Budget: ${{ total_budget }}</h3>
+            </div>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th style="width: 15%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in budget_items %}
+                        <tr>
+                            <td>{{ item.get_category_display }}</td>
+                            <td>{{ item.description }}</td>
+                            <td>${{ item.amount }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No budget items have been added to this trip.</p>
+        {% endif %}
+    </div>
+
+    <!-- Photos Section -->
+    <div class="section page-break">
+        <h2 class="print-heading">Photos</h2>
+        {% if photos %}
+            <div class="row g-3">
+                {% for photo in photos %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <img src="{{ photo.photo.url }}" class="card-img-top" alt="{{ photo.caption }}" style="object-fit: cover; height: 150px;">
+                            <div class="card-body">
+                                <p class="card-text">{{ photo.caption }}</p>
+                                <small class="text-muted">Added on {{ photo.uploaded_at|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No photos have been added to this trip.</p>
+        {% endif %}
+    </div>
+
+    <!-- Footer with timestamp -->
+    <div class="footer">
+        <p>Trip Planner - Generated on {{ now|date:"F d, Y at g:i A" }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Automatically open print dialog when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add a slight delay to ensure page is fully loaded
+        setTimeout(function() {
+            // Uncomment the line below to auto-print
+            // window.print();
+        }, 1000);
+    });
+</script>
+{% endblock %}

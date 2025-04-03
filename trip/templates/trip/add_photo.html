@@ -1,0 +1,13 @@
+<!-- trip/templates/trip/add_photo.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Add Photo</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Upload Photo</button>
+  </form>
+  <a href="{% url 'trip:trip_detail' trip.id %}" class="btn btn-secondary">Back to Trip</a>
+{% endblock %}

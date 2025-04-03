@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>{{ trip.title }}</h1>
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
+    
+    <h2>Itinerary</h2>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Activity</th>
+            <th>Location</th>
+        </tr>
+        {% for item in itinerary_items %}
+        <tr>
+            <td>{{ item.date }}</td>
+            <td>{{ item.time }}</td>
+            <td>{{ item.activity }}</td>
+            <td>{{ item.location }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Additional Information</h2>
