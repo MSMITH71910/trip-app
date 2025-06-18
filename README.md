@@ -77,3 +77,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built with Django
 - UI designed with Bootstrap
 - Icons from Font Awesome
+
+![Trip Planner Home Page](./Trip_app_mainpage.png)
