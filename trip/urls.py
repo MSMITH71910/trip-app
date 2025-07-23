@@ -8,6 +8,7 @@ app_name = 'trip'
 urlpatterns = [
     path('', views.index, name='index'),
     path('health/', views.health_check, name='health_check'),
+    path('test/', views.simple_test, name='simple_test'),
     path('terms/', views.terms_and_conditions, name='terms_and_conditions'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),

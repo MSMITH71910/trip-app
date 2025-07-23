@@ -27,21 +27,49 @@ def index(request):
 def health_check(request):
     """Health check endpoint for debugging deployment issues."""
     try:
+        # Basic Django check first
+        django_status = "Django OK"
+        
         # Test database connection
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
-            db_status = "OK"
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                db_status = "OK"
+        except Exception as db_e:
+            db_status = f"ERROR: {str(db_e)}"
+        
+        return JsonResponse({
+            'status': 'OK',
+            'django': django_status,
+            'database': db_status,
+            'environment': {
+                'DEBUG': os.getenv('DJANGO_DEBUG', 'Not Set'),
+                'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Not Set',
+                'SECRET_KEY': 'Set' if os.getenv('DJANGO_SECRET_KEY') else 'Not Set',
+                'VERCEL': 'Set' if os.getenv('VERCEL') else 'Not Set',
+            }
+        })
     except Exception as e:
-        db_status = f"ERROR: {str(e)}"
-    
+        return JsonResponse({
+            'status': 'ERROR',
+            'error': str(e),
+            'environment': {
+                'DEBUG': os.getenv('DJANGO_DEBUG', 'Not Set'),
+                'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Not Set',
+                'SECRET_KEY': 'Set' if os.getenv('DJANGO_SECRET_KEY') else 'Not Set',
+                'VERCEL': 'Set' if os.getenv('VERCEL') else 'Not Set',
+            }
+        })
+
+def simple_test(request):
+    """Simple test endpoint that should always work."""
     return JsonResponse({
-        'status': 'OK',
-        'database': db_status,
-        'environment': {
+        'message': 'Django is working!',
+        'timestamp': str(timezone.now()) if 'timezone' in globals() else 'No timezone',
+        'environment_vars': {
+            'SECRET_KEY': 'Set' if os.getenv('DJANGO_SECRET_KEY') else 'Not Set',
             'DEBUG': os.getenv('DJANGO_DEBUG', 'Not Set'),
             'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Not Set',
-            'SECRET_KEY': 'Set' if os.getenv('DJANGO_SECRET_KEY') else 'Not Set',
-            'VERCEL': 'Set' if os.getenv('VERCEL') else 'Not Set',
         }
     })
 
