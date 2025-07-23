@@ -2,6 +2,7 @@
 WSGI config for config project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
+Also provides 'app' and 'handler' for Vercel compatibility.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
