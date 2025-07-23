@@ -309,9 +309,22 @@ trip-app/
 python manage.py runserver
 ```
 
+### Vercel Deployment (Recommended)
+
+This app is ready for Vercel deployment! See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed instructions.
+
+**Quick Vercel Deploy:**
+1. Push your code to GitHub
+2. Connect your GitHub repo to Vercel
+3. Set environment variables in Vercel dashboard:
+   - `DJANGO_SECRET_KEY`
+   - `DJANGO_DEBUG=False`
+   - `DATABASE_URL` (PostgreSQL)
+4. Deploy automatically!
+
 ### Heroku Deployment
 
-This app is ready for Heroku deployment! See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+This app is also ready for Heroku deployment! See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
 
 **Quick Heroku Deploy:**
 ```bash

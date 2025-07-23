@@ -30,21 +30,30 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-prod
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
-# Heroku deployment settings
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.herokuapp.com', '*']
+# Deployment settings for multiple platforms
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.herokuapp.com', '.vercel.app', '*']
+
+# Add specific app URLs if available
 if os.getenv('HEROKU_APP_NAME'):
     ALLOWED_HOSTS.append(f"{os.getenv('HEROKU_APP_NAME')}.herokuapp.com")
+
+if os.getenv('VERCEL_URL'):
+    ALLOWED_HOSTS.append(os.getenv('VERCEL_URL'))
 
 # CSRF Settings for deployment platforms
 CSRF_TRUSTED_ORIGINS = [
     'https://*.replit.dev',
     'https://*.repl.co',
     'https://*.herokuapp.com',
+    'https://*.vercel.app',
 ]
 
-# Add Heroku app URL if available
+# Add specific app URLs to CSRF trusted origins
 if os.getenv('HEROKU_APP_NAME'):
     CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('HEROKU_APP_NAME')}.herokuapp.com")
+
+if os.getenv('VERCEL_URL'):
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('VERCEL_URL')}")
 
 
 # Application definition
@@ -99,9 +108,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Database configuration for Heroku and local development
+# Database configuration for multiple deployment platforms
 if os.getenv('DATABASE_URL'):
-    # Production database (Heroku PostgreSQL)
+    # Production database (PostgreSQL for Heroku/Vercel)
     DATABASES = {
         'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
     }
@@ -155,8 +164,11 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# WhiteNoise configuration for serving static files on Heroku
+# Static files configuration for deployment
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Additional static files directory for Vercel
+STATICFILES_BUILD_DIR = BASE_DIR / 'staticfiles_build'
 
 # Media files (User uploaded content)
 MEDIA_URL = '/media/'
