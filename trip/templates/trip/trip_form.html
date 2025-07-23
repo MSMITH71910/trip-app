@@ -74,19 +74,17 @@
         
         if (startDateInput && endDateInput) {
             startDateInput.addEventListener('change', function() {
+                // Set end date minimum to the selected start date
                 endDateInput.min = startDateInput.value;
                 if (endDateInput.value && endDateInput.value < startDateInput.value) {
                     endDateInput.value = startDateInput.value;
                 }
             });
             
-            // Set initial minimum end date to today
-            const today = new Date().toISOString().split('T')[0];
-            startDateInput.min = today;
+            // Allow past dates for start date (no minimum restriction)
+            // This allows users to create trips for past dates (completed trips)
             if (startDateInput.value) {
                 endDateInput.min = startDateInput.value;
-            } else {
-                endDateInput.min = today;
             }
         }
     });
