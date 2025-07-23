@@ -5,6 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.urls import reverse
+from django.http import JsonResponse
+from django.db import connection
+import os
 
 from .models import Trip, ItineraryItem, BudgetItem, TripPhoto, Comment, PhotoComment, Reaction, UserProfile
 from .forms import (
@@ -19,6 +22,27 @@ def index(request):
     recent_trips = Trip.objects.all().order_by('-created_at')[:6]
     return render(request, 'trip/index.html', {
         'recent_trips': recent_trips
+    })
+
+def health_check(request):
+    """Health check endpoint for debugging deployment issues."""
+    try:
+        # Test database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_status = "OK"
+    except Exception as e:
+        db_status = f"ERROR: {str(e)}"
+    
+    return JsonResponse({
+        'status': 'OK',
+        'database': db_status,
+        'environment': {
+            'DEBUG': os.getenv('DJANGO_DEBUG', 'Not Set'),
+            'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Not Set',
+            'SECRET_KEY': 'Set' if os.getenv('DJANGO_SECRET_KEY') else 'Not Set',
+            'VERCEL': 'Set' if os.getenv('VERCEL') else 'Not Set',
+        }
     })
 
 def terms_and_conditions(request):
