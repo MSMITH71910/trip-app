@@ -19,6 +19,14 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 try:
     from django.core.wsgi import get_wsgi_application
     application = get_wsgi_application()
+    
+    # For Vercel compatibility - provide both 'app' and 'handler'
+    app = application
+    
+    def handler(request):
+        """Vercel serverless function handler"""
+        return application(request.environ, request.start_response)
+        
 except Exception as e:
     # For debugging on Vercel
     import traceback
