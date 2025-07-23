@@ -17,20 +17,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Set Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-try:
-    from django.core.wsgi import get_wsgi_application
-    application = get_wsgi_application()
-    
-    # For Vercel compatibility - provide both 'app' and 'handler'
-    app = application
-    
-    def handler(request):
-        """Vercel serverless function handler"""
-        return application(request.environ, request.start_response)
-        
-except Exception as e:
-    # For debugging on Vercel
-    import traceback
-    print(f"WSGI Error: {e}")
-    print(f"Traceback: {traceback.format_exc()}")
-    raise
+# Initialize Django application
+from django.core.wsgi import get_wsgi_application
+
+# Create the WSGI application
+application = get_wsgi_application()
+
+# For Vercel compatibility - provide 'app' variable
+app = application
+
+# For Vercel compatibility - provide 'handler' function  
+def handler(environ, start_response):
+    """Vercel serverless function handler"""
+    return application(environ, start_response)
