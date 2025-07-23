@@ -25,8 +25,3 @@ application = get_wsgi_application()
 
 # For Vercel compatibility - provide 'app' variable
 app = application
-
-# For Vercel compatibility - provide 'handler' function  
-def handler(environ, start_response):
-    """Vercel serverless function handler"""
-    return application(environ, start_response)
