@@ -45,8 +45,81 @@ class Trip(models.Model):
         ordering = ['-start_date']
 
 class UserProfile(models.Model):
+    THEME_CHOICES = [
+        ('light', 'Light Mode'),
+        ('dark', 'Dark Mode'),
+        ('auto', 'Auto (System Default)'),
+    ]
+    
+    PRIVACY_CHOICES = [
+        ('public', 'Public - Anyone can see'),
+        ('registered', 'Registered Users Only'),
+        ('private', 'Private - Only Me'),
+    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_photo = models.ImageField(upload_to='profile_photos/', blank=True)
+    
+    # Portfolio Information
+    bio = models.TextField(max_length=500, blank=True, help_text='Tell others about yourself')
+    location = models.CharField(max_length=100, blank=True, help_text='Your current location')
+    website = models.URLField(blank=True, help_text='Your personal website or blog')
+    social_instagram = models.CharField(max_length=100, blank=True, help_text='Instagram username (without @)')
+    social_twitter = models.CharField(max_length=100, blank=True, help_text='Twitter username (without @)')
+    social_facebook = models.CharField(max_length=100, blank=True, help_text='Facebook profile URL')
+    
+    # Privacy Settings
+    profile_visibility = models.CharField(max_length=20, choices=PRIVACY_CHOICES, default='public')
+    trips_visibility = models.CharField(max_length=20, choices=PRIVACY_CHOICES, default='public')
+    photos_visibility = models.CharField(max_length=20, choices=PRIVACY_CHOICES, default='public')
+    email_visibility = models.CharField(max_length=20, choices=PRIVACY_CHOICES, default='private')
+    
+    # Display Settings
+    theme_preference = models.CharField(max_length=10, choices=THEME_CHOICES, default='light')
+    show_trip_count = models.BooleanField(default=True, help_text='Show trip count on profile')
+    show_join_date = models.BooleanField(default=True, help_text='Show join date on profile')
+    show_last_active = models.BooleanField(default=False, help_text='Show last active date')
+    
+    # Notification Settings
+    email_notifications = models.BooleanField(default=True, help_text='Receive email notifications')
+    comment_notifications = models.BooleanField(default=True, help_text='Notify when someone comments on your content')
+    reaction_notifications = models.BooleanField(default=True, help_text='Notify when someone reacts to your content')
+    
+    # Portfolio Settings
+    featured_trips = models.ManyToManyField('Trip', blank=True, related_name='featured_by_users', help_text='Select up to 3 trips to feature on your portfolio')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+    
+    def get_featured_trips(self):
+        return self.featured_trips.all()[:3]  # Limit to 3 featured trips
+    
+    def get_trip_count(self):
+        return self.user.trip_set.count()
+    
+    def get_photo_count(self):
+        return sum(trip.tripphoto_set.count() for trip in self.user.trip_set.all())
+    
+    def can_view_profile(self, requesting_user):
+        if self.profile_visibility == 'public':
+            return True
+        elif self.profile_visibility == 'registered' and requesting_user.is_authenticated:
+            return True
+        elif self.profile_visibility == 'private' and requesting_user == self.user:
+            return True
+        return False
+    
+    def can_view_trips(self, requesting_user):
+        if self.trips_visibility == 'public':
+            return True
+        elif self.trips_visibility == 'registered' and requesting_user.is_authenticated:
+            return True
+        elif self.trips_visibility == 'private' and requesting_user == self.user:
+            return True
+        return False
 
 class TripPhoto(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE)

@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.first_name|default:profile_user.username }}'s Portfolio - Trip Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .portfolio-hero {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+    .portfolio-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,0 1000,100 1000,0"/></svg>');
+        background-size: cover;
+    }
+    .portfolio-content {
+        position: relative;
+        z-index: 2;
+    }
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4a1f93;
+        display: block;
+    }
+    .social-links a {
+        display: inline-block;
+        margin: 0 10px;
+        padding: 10px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .social-links a:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        color: white;
+    }
+    .featured-trip-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .featured-trip-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .featured-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 2;
+    }
+    .trip-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .trip-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .trip-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    .trip-card img {
+        height: 200px;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+    .trip-card:hover img {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Portfolio Hero Section -->
+<div class="portfolio-hero">
+    <div class="container portfolio-content">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                {% if profile.profile_photo %}
+                    <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}" class="profile-avatar">
+                {% else %}
+                    <div class="profile-avatar d-flex align-items-center justify-content-center bg-light text-dark">
+                        <i class="fas fa-user fa-3x"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h1 class="display-4 mb-2">
+                    {{ profile_user.first_name|default:profile_user.username }}
+                    {% if profile_user.last_name %}{{ profile_user.last_name }}{% endif %}
+                </h1>
+                <p class="lead mb-3">@{{ profile_user.username }}</p>
+                
+                {% if profile.bio %}
+                    <p class="mb-3">{{ profile.bio }}</p>
+                {% endif %}
+                
+                {% if profile.location %}
+                    <p class="mb-2">
+                        <i class="fas fa-map-marker-alt"></i> {{ profile.location }}
+                    </p>
+                {% endif %}
+                
+                {% if profile.show_join_date %}
+                    <p class="mb-2">
+                        <i class="fas fa-calendar-alt"></i> Joined {{ profile_user.date_joined|date:"F Y" }}
+                    </p>
+                {% endif %}
+                
+                <!-- Social Links -->
+                {% if profile.website or profile.social_instagram or profile.social_twitter or profile.social_facebook %}
+                    <div class="social-links mt-3">
+                        {% if profile.website %}
+                            <a href="{{ profile.website }}" target="_blank" title="Website">
+                                <i class="fas fa-globe"></i>
+                            </a>
+                        {% endif %}
+                        {% if profile.social_instagram %}
+                            <a href="https://instagram.com/{{ profile.social_instagram }}" target="_blank" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        {% endif %}
+                        {% if profile.social_twitter %}
+                            <a href="https://twitter.com/{{ profile.social_twitter }}" target="_blank" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        {% endif %}
+                        {% if profile.social_facebook %}
+                            <a href="{{ profile.social_facebook }}" target="_blank" title="Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-3">
+                {% if is_own_profile %}
+                    <div class="text-center">
+                        <a href="{% url 'trip:edit_portfolio' %}" class="btn btn-light btn-lg mb-2 w-100">
+                            <i class="fas fa-edit"></i> Edit Portfolio
+                        </a>
+                        <a href="{% url 'trip:user_settings' %}" class="btn btn-outline-light btn-lg w-100">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="container mb-5">
+    <div class="row g-4">
+        {% if trip_count is not None %}
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <span class="stat-number">{{ trip_count }}</span>
+                    <p class="mb-0 text-muted">Trip{{ trip_count|pluralize }}</p>
+                </div>
+            </div>
+        {% endif %}
+        <div class="col-md-4">
+            <div class="stats-card">
+                <span class="stat-number">{{ photo_count }}</span>
+                <p class="mb-0 text-muted">Photo{{ photo_count|pluralize }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <span class="stat-number">{{ featured_trips|length }}</span>
+                <p class="mb-0 text-muted">Featured Trip{{ featured_trips|length|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Trips Section -->
+{% if featured_trips %}
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="display-6 mb-4 text-primary">
+                <i class="fas fa-star"></i> Featured Adventures
+            </h2>
+            <div class="row g-4">
+                {% for trip in featured_trips %}
+                    <div class="col-md-4">
+                        <div class="card featured-trip-card h-100">
+                            <div class="position-relative">
+                                <span class="featured-badge">
+                                    <i class="fas fa-star"></i> Featured
+                                </span>
+                                <img src="{{ trip.get_profile_photo_url }}" class="card-img-top" alt="{{ trip.title }}">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ trip.title }}</h5>
+                                <p class="card-text text-muted">{{ trip.description|truncatechars:100 }}</p>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                    <small class="text-muted">{{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a href="{% url 'trip:trip_detail' trip_id=trip.id %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-eye"></i> View Trip
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- All Trips Section -->
+{% if trips %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="display-6 mb-4 text-primary">
+                <i class="fas fa-map-marked-alt"></i> All Adventures
+            </h2>
+            <div class="trip-grid">
+                {% for trip in trips %}
+                    <div class="card trip-card">
+                        <div class="position-relative overflow-hidden">
+                            <img src="{{ trip.get_profile_photo_url }}" class="card-img-top" alt="{{ trip.title }}">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ trip.title }}</h5>
+                            <p class="card-text text-muted">{{ trip.description|truncatechars:80 }}</p>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                <small class="text-muted">{{ trip.start_date|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="{% url 'trip:trip_detail' trip_id=trip.id %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% elif is_own_profile %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-5">
+                    <i class="fas fa-suitcase fa-4x text-muted mb-4"></i>
+                    <h3 class="text-muted mb-3">No trips yet!</h3>
+                    <p class="text-muted mb-4">Start planning your first adventure and build your travel portfolio.</p>
+                    <a href="{% url 'trip:trip_new' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle"></i> Create Your First Trip
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-5">
+                    <i class="fas fa-lock fa-4x text-muted mb-4"></i>
+                    <h3 class="text-muted mb-3">Private Profile</h3>
+                    <p class="text-muted">This user's trips are set to private.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

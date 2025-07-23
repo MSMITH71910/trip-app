@@ -48,16 +48,32 @@ A comprehensive Django web application for planning, organizing, and sharing you
 
 ### 🔐 **User Management**
 - Secure user registration with **terms and conditions acceptance**
-- User profiles with profile photos
-- Personal trip dashboard
-- Account management
+- **Comprehensive user portfolios** with featured trips
+- **Advanced privacy settings** (Public, Registered Users, Private)
+- **Theme preferences** (Light, Dark, Auto mode)
+- Personal trip dashboard and account management
 
 ### 🎨 **Modern UI/UX**
 - **Beautiful gradient designs** with purple theme
+- **Dark mode support** with automatic theme detection
 - **Responsive design** that works on all devices
 - **Smooth animations** and hover effects
 - **Professional typography** and spacing
 - **Card-based layouts** with modern styling
+
+### 👤 **User Portfolio System**
+- **Personal portfolio pages** showcasing travel experiences
+- **Featured trips** selection (up to 3 trips)
+- **Social media integration** (Instagram, Twitter, Facebook)
+- **Bio and location** information
+- **Privacy controls** for profile visibility
+
+### ⚙️ **Advanced Settings**
+- **Privacy controls** for profile, trips, and photos
+- **Theme preferences** (Light, Dark, Auto)
+- **Notification settings** for comments and reactions
+- **Display options** for profile information
+- **Featured trips management**
 
 ## 🚀 Quick Start
 
@@ -293,6 +309,28 @@ trip-app/
 python manage.py runserver
 ```
 
+### Heroku Deployment
+
+This app is ready for Heroku deployment! See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+
+**Quick Heroku Deploy:**
+```bash
+# Create Heroku app
+heroku create your-app-name
+
+# Add PostgreSQL
+heroku addons:create heroku-postgresql:mini
+
+# Set environment variables
+heroku config:set DJANGO_SECRET_KEY="your-secret-key"
+heroku config:set DJANGO_DEBUG=False
+heroku config:set HEROKU_APP_NAME=your-app-name
+
+# Deploy
+git push heroku main
+heroku run python manage.py migrate
+```
+
 ### Production Considerations
 
 1. **Static Files**
@@ -309,6 +347,7 @@ python manage.py runserver
    - Set `DEBUG=False`
    - Configure `ALLOWED_HOSTS`
    - Set secure `SECRET_KEY`
+   - Configure `DATABASE_URL` for PostgreSQL
 
 ## 🤝 Contributing
 

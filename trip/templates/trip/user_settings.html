@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Trip Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-hero {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+    .settings-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    .settings-card .card-header {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+    .form-section {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .form-section:last-child {
+        border-bottom: none;
+    }
+    .form-section h5 {
+        color: #4a1f93;
+        margin-bottom: 1rem;
+    }
+    .form-select, .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .form-select:focus, .form-control:focus {
+        border-color: #4a1f93;
+        box-shadow: 0 0 0 0.2rem rgba(74, 31, 147, 0.25);
+    }
+    .form-check-input:checked {
+        background-color: #4a1f93;
+        border-color: #4a1f93;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 15px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(74, 31, 147, 0.4);
+    }
+    .privacy-info {
+        background: #f8f9fa;
+        border-left: 4px solid #4a1f93;
+        padding: 1rem;
+        border-radius: 0 10px 10px 0;
+        margin-bottom: 1rem;
+    }
+    .featured-trips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .trip-checkbox-card {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .trip-checkbox-card:hover {
+        border-color: #4a1f93;
+        transform: translateY(-2px);
+    }
+    .trip-checkbox-card.selected {
+        border-color: #4a1f93;
+        background: rgba(74, 31, 147, 0.1);
+    }
+    .trip-checkbox-card img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    .theme-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+        border: 2px solid #ddd;
+    }
+    .theme-light { background: linear-gradient(45deg, #fff 50%, #f8f9fa 50%); }
+    .theme-dark { background: linear-gradient(45deg, #343a40 50%, #212529 50%); }
+    .theme-auto { background: linear-gradient(45deg, #fff 25%, #343a40 25%, #343a40 50%, #fff 50%, #fff 75%, #343a40 75%); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="settings-hero text-center">
+    <div class="container">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-cog"></i> Account Settings
+        </h1>
+        <p class="lead mb-0">Customize your Trip Planner experience and privacy preferences</p>
+    </div>
+</div>
+
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Privacy Settings -->
+        <div class="card settings-card">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-shield-alt"></i> Privacy Settings
+                </h3>
+                <p class="mb-0 mt-2 opacity-75">Control who can see your content</p>
+            </div>
+            <div class="card-body p-0">
+                <div class="form-section">
+                    <div class="privacy-info">
+                        <h6 class="mb-2"><i class="fas fa-info-circle"></i> Privacy Levels</h6>
+                        <ul class="mb-0 small">
+                            <li><strong>Public:</strong> Anyone can see this content</li>
+                            <li><strong>Registered Users Only:</strong> Only logged-in users can see this</li>
+                            <li><strong>Private:</strong> Only you can see this content</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.profile_visibility.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> Profile Visibility
+                            </label>
+                            {{ form.profile_visibility }}
+                            {% if form.profile_visibility.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.profile_visibility.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.trips_visibility.id_for_label }}" class="form-label">
+                                <i class="fas fa-map-marked-alt"></i> Trips Visibility
+                            </label>
+                            {{ form.trips_visibility }}
+                            {% if form.trips_visibility.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.trips_visibility.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.photos_visibility.id_for_label }}" class="form-label">
+                                <i class="fas fa-camera"></i> Photos Visibility
+                            </label>
+                            {{ form.photos_visibility }}
+                            {% if form.photos_visibility.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.photos_visibility.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.email_visibility.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope"></i> Email Visibility
+                            </label>
+                            {{ form.email_visibility }}
+                            {% if form.email_visibility.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.email_visibility.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Display Settings -->
+        <div class="card settings-card">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-palette"></i> Display Settings
+                </h3>
+                <p class="mb-0 mt-2 opacity-75">Customize how your profile appears</p>
+            </div>
+            <div class="card-body p-0">
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.theme_preference.id_for_label }}" class="form-label">
+                                <i class="fas fa-moon"></i> Theme Preference
+                            </label>
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="theme-preview theme-light"></span>
+                                <span class="theme-preview theme-dark"></span>
+                                <span class="theme-preview theme-auto"></span>
+                                <small class="text-muted">Light, Dark, Auto</small>
+                            </div>
+                            {{ form.theme_preference }}
+                            {% if form.theme_preference.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.theme_preference.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-eye"></i> Profile Display Options
+                            </label>
+                            
+                            <div class="form-check mb-2">
+                                {{ form.show_trip_count }}
+                                <label class="form-check-label" for="{{ form.show_trip_count.id_for_label }}">
+                                    Show trip count on profile
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-2">
+                                {{ form.show_join_date }}
+                                <label class="form-check-label" for="{{ form.show_join_date.id_for_label }}">
+                                    Show join date on profile
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                {{ form.show_last_active }}
+                                <label class="form-check-label" for="{{ form.show_last_active.id_for_label }}">
+                                    Show last active date
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification Settings -->
+        <div class="card settings-card">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-bell"></i> Notification Settings
+                </h3>
+                <p class="mb-0 mt-2 opacity-75">Choose what notifications you want to receive</p>
+            </div>
+            <div class="card-body p-0">
+                <div class="form-section">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                {{ form.email_notifications }}
+                                <label class="form-check-label" for="{{ form.email_notifications.id_for_label }}">
+                                    <i class="fas fa-envelope"></i> Email Notifications
+                                </label>
+                                <div class="form-text">{{ form.email_notifications.help_text }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                {{ form.comment_notifications }}
+                                <label class="form-check-label" for="{{ form.comment_notifications.id_for_label }}">
+                                    <i class="fas fa-comment"></i> Comment Notifications
+                                </label>
+                                <div class="form-text">{{ form.comment_notifications.help_text }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                {{ form.reaction_notifications }}
+                                <label class="form-check-label" for="{{ form.reaction_notifications.id_for_label }}">
+                                    <i class="fas fa-heart"></i> Reaction Notifications
+                                </label>
+                                <div class="form-text">{{ form.reaction_notifications.help_text }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Featured Trips -->
+        <div class="card settings-card">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-star"></i> Featured Trips
+                </h3>
+                <p class="mb-0 mt-2 opacity-75">Select up to 3 trips to feature on your portfolio</p>
+            </div>
+            <div class="card-body p-0">
+                <div class="form-section">
+                    {% if form.featured_trips.field.queryset %}
+                        <div class="featured-trips-grid">
+                            {% for trip in form.featured_trips.field.queryset %}
+                                <div class="trip-checkbox-card" onclick="toggleTripSelection({{ trip.id }})">
+                                    <img src="{{ trip.get_profile_photo_url }}" alt="{{ trip.title }}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="featured_trips" value="{{ trip.id }}" id="trip_{{ trip.id }}"
+                                               {% if trip in profile.featured_trips.all %}checked{% endif %}>
+                                        <label class="form-check-label" for="trip_{{ trip.id }}">
+                                            <strong>{{ trip.title }}</strong><br>
+                                            <small class="text-muted">{{ trip.start_date|date:"M Y" }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.featured_trips.errors %}
+                            <div class="alert alert-danger mt-3">{{ form.featured_trips.errors }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-suitcase fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No trips to feature yet</h5>
+                            <p class="text-muted">Create some trips first, then come back to feature them on your portfolio.</p>
+                            <a href="{% url 'trip:trip_new' %}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle"></i> Create Your First Trip
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Save Button -->
+        <div class="row mb-5">
+            <div class="col-md-6 mx-auto">
+                <button type="submit" class="btn btn-primary btn-save btn-lg w-100">
+                    <i class="fas fa-save"></i> Save All Settings
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleTripSelection(tripId) {
+    const checkbox = document.getElementById('trip_' + tripId);
+    const card = checkbox.closest('.trip-checkbox-card');
+    
+    checkbox.checked = !checkbox.checked;
+    
+    if (checkbox.checked) {
+        card.classList.add('selected');
+    } else {
+        card.classList.remove('selected');
+    }
+    
+    // Check if more than 3 trips are selected
+    const checkedBoxes = document.querySelectorAll('input[name="featured_trips"]:checked');
+    if (checkedBoxes.length > 3) {
+        checkbox.checked = false;
+        card.classList.remove('selected');
+        alert('You can only select up to 3 featured trips.');
+    }
+}
+
+// Initialize selected state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const checkedBoxes = document.querySelectorAll('input[name="featured_trips"]:checked');
+    checkedBoxes.forEach(function(checkbox) {
+        const card = checkbox.closest('.trip-checkbox-card');
+        card.classList.add('selected');
+    });
+});
+</script>
+{% endblock %}

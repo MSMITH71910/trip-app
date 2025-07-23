@@ -50,3 +50,26 @@ ENV/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Static files
+staticfiles/
+static/
+
+# Heroku
+.heroku/
+
+# Additional Python
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+wheels/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/

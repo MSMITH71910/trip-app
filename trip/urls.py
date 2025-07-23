@@ -33,4 +33,10 @@ urlpatterns = [
     path('photo_comment/<int:comment_id>/edit/', views.edit_photo_comment, name='edit_photo_comment'),
     path('photo_comment/<int:comment_id>/delete/', views.delete_photo_comment, name='delete_photo_comment'),
     path('photo_comment/<int:photo_comment_id>/react/<str:reaction_type>/', views.react_photo_comment, name='react_photo_comment'),
+    
+    # Portfolio and Settings URLs
+    path('portfolio/', views.user_portfolio, name='user_portfolio'),
+    path('portfolio/edit/', views.edit_portfolio, name='edit_portfolio'),
+    path('settings/', views.user_settings, name='user_settings'),
+    path('user/<str:username>/', views.public_portfolio, name='public_portfolio'),
 ]

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Portfolio - Trip Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .portfolio-hero {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+    .form-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .form-card .card-header {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        padding: 12px 16px;
+        font-size: 16px;
+    }
+    .form-control:focus {
+        border-color: #4a1f93;
+        box-shadow: 0 0 0 0.2rem rgba(74, 31, 147, 0.25);
+    }
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 15px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(74, 31, 147, 0.4);
+    }
+    .current-photo {
+        max-width: 150px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Better spacing for form sections */
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+    }
+    
+    .form-section:not(:last-child) {
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 6px;
+        line-height: 1.4;
+    }
+    
+    /* Ensure form fields are clickable and visible */
+    .form-control {
+        position: relative;
+        z-index: 1;
+        background-color: #fff;
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    .form-control:disabled {
+        background-color: #e9ecef;
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="portfolio-hero text-center">
+    <div class="container">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-user-edit"></i> Edit Your Portfolio
+        </h1>
+        <p class="lead mb-0">Update your profile information and showcase your travel personality</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card form-card">
+                <div class="card-header text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-id-card"></i> Portfolio Information
+                    </h3>
+                    <p class="mb-0 mt-2 opacity-75">Tell the world about your travel adventures</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Profile Photo Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                {% if profile.profile_photo %}
+                                    <img src="{{ profile.profile_photo.url }}" alt="Current Photo" class="current-photo mb-3">
+                                    <p class="text-muted small">Current Photo</p>
+                                {% else %}
+                                    <div class="current-photo mx-auto mb-3 d-flex align-items-center justify-content-center bg-light">
+                                        <i class="fas fa-user fa-3x text-muted"></i>
+                                    </div>
+                                    <p class="text-muted small">No photo uploaded</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <label for="{{ form.profile_photo.id_for_label }}" class="form-label">
+                                    <i class="fas fa-camera"></i> Profile Photo
+                                </label>
+                                {{ form.profile_photo }}
+                                <div class="form-text">Upload a photo that represents you. JPG, PNG formats supported.</div>
+                                {% if form.profile_photo.errors %}
+                                    <div class="alert alert-danger mt-2">
+                                        {{ form.profile_photo.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Bio Section -->
+                        <div class="mb-5">
+                            <label for="{{ form.bio.id_for_label }}" class="form-label h6">
+                                <i class="fas fa-quote-left text-primary me-2"></i>Bio
+                            </label>
+                            {{ form.bio }}
+                            <div class="form-text mt-2">Tell others about yourself and your travel experiences</div>
+                            {% if form.bio.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.bio.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Location Section -->
+                        <div class="mb-5">
+                            <label for="{{ form.location.id_for_label }}" class="form-label h6">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>Location
+                            </label>
+                            {{ form.location }}
+                            <div class="form-text mt-2">Your current city or country</div>
+                            {% if form.location.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.location.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Website Section -->
+                        <div class="mb-5">
+                            <label for="{{ form.website.id_for_label }}" class="form-label h6">
+                                <i class="fas fa-globe text-primary me-2"></i>Website
+                            </label>
+                            {{ form.website }}
+                            <div class="form-text mt-2">Your personal website or blog URL</div>
+                            {% if form.website.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.website.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Social Media Section -->
+                        <div class="mb-5">
+                            <h5 class="text-primary mb-4">
+                                <i class="fas fa-share-alt me-2"></i>Social Media Links
+                            </h5>
+                            
+                            <div class="alert alert-info mb-4">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-info-circle me-2"></i>Connect your social media accounts
+                                </h6>
+                                <p class="mb-0">Add your Instagram, Twitter, and Facebook profiles to help others connect with you.</p>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <label for="{{ form.social_instagram.id_for_label }}" class="form-label">
+                                        <i class="fab fa-instagram text-danger me-2"></i>Instagram
+                                    </label>
+                                    {{ form.social_instagram }}
+                                    <div class="form-text mt-2">Username only (e.g., "johndoe")</div>
+                                    {% if form.social_instagram.errors %}
+                                        <div class="alert alert-danger mt-2">{{ form.social_instagram.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-4 mb-4">
+                                    <label for="{{ form.social_twitter.id_for_label }}" class="form-label">
+                                        <i class="fab fa-x-twitter text-dark me-2"></i>X (Twitter)
+                                    </label>
+                                    {{ form.social_twitter }}
+                                    <div class="form-text mt-2">Username only (e.g., "johndoe")</div>
+                                    {% if form.social_twitter.errors %}
+                                        <div class="alert alert-danger mt-2">{{ form.social_twitter.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-4 mb-4">
+                                    <label for="{{ form.social_facebook.id_for_label }}" class="form-label">
+                                        <i class="fab fa-facebook text-primary me-2"></i>Facebook
+                                    </label>
+                                    {{ form.social_facebook }}
+                                    <div class="form-text mt-2">Full profile URL</div>
+                                    {% if form.social_facebook.errors %}
+                                        <div class="alert alert-danger mt-2">{{ form.social_facebook.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="row mt-5 pt-4 border-top">
+                            <div class="col-md-6 mb-3">
+                                <button type="submit" class="btn btn-primary btn-save btn-lg w-100">
+                                    <i class="fas fa-save me-2"></i> Save Portfolio
+                                </button>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="{% url 'trip:user_portfolio' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                    <i class="fas fa-times me-2"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Quick Tips -->
+            <div class="card mt-4 border-0 bg-light">
+                <div class="card-body">
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-lightbulb"></i> Portfolio Tips
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Use a clear, friendly profile photo
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Write an engaging bio about your travel style
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Add your location to connect with local travelers
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Link your social media for more connections
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

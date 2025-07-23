@@ -64,6 +64,90 @@ class TripPhotoUpdateForm(forms.ModelForm):
             'profile_photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'profile_photo', 'bio', 'location', 'website',
+            'social_instagram', 'social_twitter', 'social_facebook'
+        ]
+        widgets = {
+            'profile_photo': forms.FileInput(attrs={'class': 'form-control'}),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control', 
+                'rows': 4, 
+                'placeholder': 'Tell others about yourself and your travel experiences...'
+            }),
+            'location': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'e.g., New York, USA'
+            }),
+            'website': forms.URLInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'https://yourwebsite.com'
+            }),
+            'social_instagram': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'your_username'
+            }),
+            'social_twitter': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'your_username'
+            }),
+            'social_facebook': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'https://facebook.com/yourprofile'
+            }),
+        }
+        
+        labels = {
+            'social_twitter': 'X (Twitter)',
+            'social_instagram': 'Instagram',
+            'social_facebook': 'Facebook',
+        }
+
+class UserSettingsForm(forms.ModelForm):
+    featured_trips = forms.ModelMultipleChoiceField(
+        queryset=Trip.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text='Select up to 3 trips to feature on your portfolio'
+    )
+    
+    class Meta:
+        model = UserProfile
+        fields = [
+            'profile_visibility', 'trips_visibility', 'photos_visibility', 'email_visibility',
+            'theme_preference', 'show_trip_count', 'show_join_date', 'show_last_active',
+            'email_notifications', 'comment_notifications', 'reaction_notifications',
+            'featured_trips'
+        ]
+        widgets = {
+            'profile_visibility': forms.Select(attrs={'class': 'form-select'}),
+            'trips_visibility': forms.Select(attrs={'class': 'form-select'}),
+            'photos_visibility': forms.Select(attrs={'class': 'form-select'}),
+            'email_visibility': forms.Select(attrs={'class': 'form-select'}),
+            'theme_preference': forms.Select(attrs={'class': 'form-select'}),
+            'show_trip_count': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_join_date': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'show_last_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'comment_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'reaction_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['featured_trips'].queryset = Trip.objects.filter(user=user)
+    
+    def clean_featured_trips(self):
+        featured_trips = self.cleaned_data.get('featured_trips')
+        if featured_trips and len(featured_trips) > 3:
+            raise forms.ValidationError('You can only select up to 3 featured trips.')
+        return featured_trips
+
 class ItineraryItemForm(forms.ModelForm):
     class Meta:
         model = ItineraryItem
@@ -112,7 +196,7 @@ class PhotoCommentForm(forms.ModelForm):
             'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
         }
 
-class UserProfileForm(forms.ModelForm):
+class UserProfilePhotoForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['profile_photo']

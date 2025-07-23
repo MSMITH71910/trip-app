@@ -10,7 +10,7 @@ from .models import Trip, ItineraryItem, BudgetItem, TripPhoto, Comment, PhotoCo
 from .forms import (
     SignUpForm, TripForm, TripPhotoUpdateForm, ItineraryItemForm,
     BudgetItemForm, TripPhotoForm, CommentForm, 
-    PhotoCommentForm, UserProfileForm, ReactionForm
+    PhotoCommentForm, UserProfileForm, UserSettingsForm, ReactionForm
 )
 
 def index(request):
@@ -546,3 +546,80 @@ def edit_photo_comment(request, comment_id):
         form = PhotoCommentForm(instance=comment)
     
     return render(request, 'trip/edit_photo_comment.html', {'form': form, 'comment': comment, 'photo': photo, 'trip': trip})
+
+@login_required
+def user_portfolio(request, username=None):
+    """Display user portfolio page."""
+    if username:
+        user = get_object_or_404(User, username=username)
+    else:
+        user = request.user
+    
+    # Get or create user profile
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    
+    # Check if the requesting user can view this profile
+    if not profile.can_view_profile(request.user):
+        messages.error(request, 'This profile is private.')
+        return redirect('trip:index')
+    
+    # Get user's trips if they can be viewed
+    trips = []
+    if profile.can_view_trips(request.user):
+        trips = Trip.objects.filter(user=user).order_by('-created_at')
+    
+    # Get featured trips
+    featured_trips = profile.get_featured_trips()
+    
+    context = {
+        'profile_user': user,
+        'profile': profile,
+        'trips': trips,
+        'featured_trips': featured_trips,
+        'trip_count': profile.get_trip_count() if profile.show_trip_count else None,
+        'photo_count': profile.get_photo_count(),
+        'is_own_profile': request.user == user,
+    }
+    
+    return render(request, 'trip/user_portfolio.html', context)
+
+@login_required
+def edit_portfolio(request):
+    """Edit user portfolio information."""
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Portfolio updated successfully!')
+            return redirect('trip:user_portfolio')
+    else:
+        form = UserProfileForm(instance=profile)
+    
+    return render(request, 'trip/edit_portfolio.html', {'form': form, 'profile': profile})
+
+@login_required
+def user_settings(request):
+    """User settings page."""
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        form = UserSettingsForm(request.POST, instance=profile, user=request.user)
+        if form.is_valid():
+            # Clear existing featured trips and set new ones
+            profile.featured_trips.clear()
+            for trip in form.cleaned_data['featured_trips']:
+                profile.featured_trips.add(trip)
+            
+            form.save()
+            messages.success(request, 'Settings updated successfully!')
+            return redirect('trip:user_settings')
+    else:
+        form = UserSettingsForm(instance=profile, user=request.user)
+    
+    return render(request, 'trip/user_settings.html', {'form': form, 'profile': profile})
+
+def public_portfolio(request, username):
+    """Public view of user portfolio."""
+    return user_portfolio(request, username)
