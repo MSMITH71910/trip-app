@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms and Conditions - Trip Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .terms-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .terms-section {
+        margin-bottom: 2rem;
+    }
+    .terms-section h3 {
+        color: #4a1f93;
+        border-bottom: 2px solid #4a1f93;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .terms-section h4 {
+        color: #6c757d;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .last-updated {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #4a1f93;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-primary">
+            <i class="fas fa-file-contract"></i> Terms and Conditions
+        </h1>
+        <p class="lead text-muted">Please read these terms carefully before using Trip Planner</p>
+    </div>
+
+    <div class="last-updated">
+        <strong><i class="fas fa-calendar-alt"></i> Last Updated:</strong> January 2025
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-handshake"></i> 1. Acceptance of Terms</h3>
+        <p>By accessing and using Trip Planner ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.</p>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-info-circle"></i> 2. Description of Service</h3>
+        <p>Trip Planner is a web-based application that allows users to:</p>
+        <ul>
+            <li>Create and manage travel itineraries</li>
+            <li>Track travel budgets and expenses</li>
+            <li>Share photos and experiences from trips</li>
+            <li>Explore and interact with other users' travel content</li>
+            <li>Comment and react to travel posts</li>
+        </ul>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-user-check"></i> 3. User Accounts</h3>
+        <h4>Registration</h4>
+        <p>To use certain features of the Service, you must register for an account. You agree to:</p>
+        <ul>
+            <li>Provide accurate, current, and complete information during registration</li>
+            <li>Maintain and update your information to keep it accurate and current</li>
+            <li>Keep your password secure and confidential</li>
+            <li>Accept responsibility for all activities under your account</li>
+        </ul>
+        
+        <h4>Account Security</h4>
+        <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-gavel"></i> 4. User Conduct</h3>
+        <p>You agree not to use the Service to:</p>
+        <ul>
+            <li>Upload, post, or transmit any content that is unlawful, harmful, threatening, abusive, harassing, defamatory, vulgar, obscene, or otherwise objectionable</li>
+            <li>Impersonate any person or entity or falsely state or misrepresent your affiliation with a person or entity</li>
+            <li>Upload, post, or transmit any content that infringes any patent, trademark, trade secret, copyright, or other proprietary rights</li>
+            <li>Upload, post, or transmit any unsolicited or unauthorized advertising, promotional materials, spam, or any other form of solicitation</li>
+            <li>Interfere with or disrupt the Service or servers or networks connected to the Service</li>
+        </ul>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-camera"></i> 5. Content and Intellectual Property</h3>
+        <h4>Your Content</h4>
+        <p>You retain ownership of any content you submit, post, or display on the Service. By submitting content, you grant us a non-exclusive, worldwide, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display, and distribute such content.</p>
+        
+        <h4>Our Content</h4>
+        <p>The Service and its original content, features, and functionality are owned by Trip Planner and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-shield-alt"></i> 6. Privacy Policy</h3>
+        <p>Your privacy is important to us. We collect and use your information in accordance with our privacy practices:</p>
+        <ul>
+            <li>We collect information you provide when registering and using the Service</li>
+            <li>We use this information to provide and improve the Service</li>
+            <li>We do not sell or share your personal information with third parties without your consent</li>
+            <li>We implement appropriate security measures to protect your information</li>
+        </ul>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-exclamation-triangle"></i> 7. Disclaimers</h3>
+        <p>The Service is provided "as is" and "as available" without any warranties of any kind. We do not warrant that:</p>
+        <ul>
+            <li>The Service will be uninterrupted or error-free</li>
+            <li>The results obtained from the Service will be accurate or reliable</li>
+            <li>Any errors in the Service will be corrected</li>
+        </ul>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-ban"></i> 8. Limitation of Liability</h3>
+        <p>In no event shall Trip Planner be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your use of the Service.</p>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-times-circle"></i> 9. Termination</h3>
+        <p>We may terminate or suspend your account and bar access to the Service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-edit"></i> 10. Changes to Terms</h3>
+        <p>We reserve the right to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days notice prior to any new terms taking effect.</p>
+    </div>
+
+    <div class="terms-section">
+        <h3><i class="fas fa-envelope"></i> 11. Contact Information</h3>
+        <p>If you have any questions about these Terms and Conditions, please contact us at:</p>
+        <div class="alert alert-info">
+            <strong>Email:</strong> support@tripplanner.com<br>
+            <strong>Address:</strong> Trip Planner Support Team
+        </div>
+    </div>
+
+    <div class="text-center mt-5 mb-4">
+        <a href="{% url 'trip:signup' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-user-plus"></i> I Agree - Create Account
+        </a>
+        <a href="{% url 'trip:index' %}" class="btn btn-outline-secondary btn-lg ms-3">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

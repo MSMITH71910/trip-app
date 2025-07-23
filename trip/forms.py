@@ -6,17 +6,43 @@ from django.contrib.auth.models import User
 from .models import Trip, ItineraryItem, BudgetItem, TripPhoto, Comment, PhotoComment, UserProfile, Reaction
 
 class SignUpForm(UserCreationForm):
-    email = forms.EmailField(max_length=254, required=True)
+    email = forms.EmailField(
+        max_length=254, 
+        required=True,
+        help_text='We\'ll never share your email with anyone else.'
+    )
+    first_name = forms.CharField(
+        max_length=30, 
+        required=True,
+        help_text='Your first name'
+    )
+    last_name = forms.CharField(
+        max_length=30, 
+        required=True,
+        help_text='Your last name'
+    )
+    terms_accepted = forms.BooleanField(
+        required=True,
+        label='I agree to the Terms and Conditions',
+        help_text='You must accept the terms and conditions to create an account.'
+    )
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Add Bootstrap styling
         for field_name in self.fields:
-            self.fields[field_name].widget.attrs.update({'class': 'form-control'})
+            if field_name == 'terms_accepted':
+                self.fields[field_name].widget.attrs.update({'class': 'form-check-input'})
+            else:
+                self.fields[field_name].widget.attrs.update({'class': 'form-control'})
+        
+        # Customize help text for password fields
+        self.fields['password1'].help_text = 'Your password must contain at least 8 characters and cannot be entirely numeric.'
+        self.fields['password2'].help_text = 'Enter the same password as before, for verification.'
 
 class TripForm(forms.ModelForm):
     class Meta:

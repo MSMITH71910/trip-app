@@ -21,17 +21,24 @@ def index(request):
         'recent_trips': recent_trips
     })
 
+def terms_and_conditions(request):
+    """Terms and Conditions page."""
+    return render(request, 'trip/terms_and_conditions.html')
+
 def signup(request):
     """User registration view."""
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.first_name = form.cleaned_data.get('first_name')
+            user.last_name = form.cleaned_data.get('last_name')
+            user.save()
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            messages.success(request, 'Account created successfully!')
+            messages.success(request, f'Welcome to Trip Planner, {user.first_name}! Your account has been created successfully!')
             return redirect('trip:profile')
     else:
         form = SignUpForm()

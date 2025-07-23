@@ -1,32 +1,186 @@
 {% extends 'base.html' %}
 
-{% block title %}Login to Trip Planner{% endblock %}
+{% block title %}Welcome Back - Trip Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-hero {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+    .login-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .login-card .card-header {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        color: white;
+        border: none;
+        padding: 2rem;
+    }
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+    .form-floating > .form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        height: 60px;
+    }
+    .form-floating > .form-control:focus {
+        border-color: #4a1f93;
+        box-shadow: 0 0 0 0.2rem rgba(74, 31, 147, 0.25);
+    }
+    .form-floating > label {
+        color: #6c757d;
+    }
+    .btn-login {
+        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 15px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(74, 31, 147, 0.4);
+    }
+    .welcome-features {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-top: 2rem;
+    }
+    .feature-highlight {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .feature-highlight i {
+        color: #4a1f93;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h3 class="card-title mb-0">Login to Your Account</h3>
+    <div class="col-lg-10">
+        <!-- Hero Section -->
+        <div class="login-hero text-center">
+            <div class="container">
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-plane-departure"></i> Welcome Back!
+                </h1>
+                <p class="lead mb-0">Ready to continue your travel adventures?</p>
             </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+
+        <div class="row">
+            <!-- Login Form -->
+            <div class="col-lg-6">
+                <div class="card login-card">
+                    <div class="card-header text-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-sign-in-alt"></i> Login to Your Account
+                        </h3>
+                        <p class="mb-0 mt-2 opacity-75">Access your trips and travel memories</p>
                     </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="card-body p-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                                <label for="username">
+                                    <i class="fas fa-user"></i> Username
+                                </label>
+                            </div>
+                            
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                <label for="password">
+                                    <i class="fas fa-lock"></i> Password
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-login btn-lg">
+                                    <i class="fas fa-rocket"></i> Login to Trip Planner
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Login</button>
+                    <div class="card-footer bg-light text-center py-3">
+                        <p class="mb-0">
+                            Don't have an account? 
+                            <a href="{% url 'trip:signup' %}" class="text-primary fw-bold">
+                                <i class="fas fa-user-plus"></i> Sign up here
+                            </a>
+                        </p>
                     </div>
-                </form>
+                </div>
             </div>
-            <div class="card-footer bg-white text-center">
-                <p class="mb-0">Don't have an account? <a href="{% url 'trip:signup' %}">Sign up here</a></p>
+
+            <!-- Welcome Features -->
+            <div class="col-lg-6">
+                <div class="welcome-features">
+                    <h4 class="text-primary mb-4">
+                        <i class="fas fa-compass"></i> Your Travel Hub Awaits
+                    </h4>
+                    
+                    <div class="feature-highlight">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <div>
+                            <strong>Your Trips</strong><br>
+                            <small class="text-muted">Access all your planned and completed adventures</small>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <i class="fas fa-camera"></i>
+                        <div>
+                            <strong>Photo Memories</strong><br>
+                            <small class="text-muted">View and share your travel photos and experiences</small>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <strong>Travel Community</strong><br>
+                            <small class="text-muted">Connect with fellow travelers and explore their journeys</small>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-highlight">
+                        <i class="fas fa-plus-circle"></i>
+                        <div>
+                            <strong>Plan New Adventures</strong><br>
+                            <small class="text-muted">Create detailed itineraries and budget plans</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">
+                        <i class="fas fa-shield-alt"></i> 
+                        Secure login protected by industry-standard encryption
+                    </p>
+                </div>
             </div>
         </div>
     </div>
