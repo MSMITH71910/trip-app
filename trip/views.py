@@ -170,19 +170,20 @@ def profile(request):
                 except Exception as e:
                     print(f"Error saving profile: {str(e)}")
                     error_msg = str(e).lower()
-                    if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
-                        # Graceful fallback: save everything except the image
-                        # Reload from DB to discard any partial changes including the failed photo
-                        profile = UserProfile.objects.get(pk=profile.pk)
-                        for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
-                            if field in request.POST:
-                                setattr(profile, field, request.POST[field])
-                        profile.save()
-                        
-                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
-                        return redirect('trip:profile')
                     
-                    messages.error(request, f"An error occurred: {str(e)}")
+                    # Graceful fallback: save everything except the image
+                    profile = UserProfile.objects.get(pk=profile.pk)
+                    for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
+                        if field in request.POST:
+                            setattr(profile, field, request.POST[field])
+                    profile.save()
+                    
+                    if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                        messages.warning(request, "Info saved, but your photo couldn't be uploaded to permanent storage. (Cloudinary not configured)")
+                    else:
+                        messages.error(request, f"An error occurred: {str(e)}")
+                    
+                    return redirect('trip:profile')
         else:
             form = UserProfileForm(instance=profile)
         
@@ -759,21 +760,21 @@ def edit_portfolio(request):
                     return redirect('trip:user_portfolio')
                 except Exception as e:
                     print(f"Error saving portfolio: {str(e)}")
-                    # Check for common filesystem error strings or OSError
                     error_msg = str(e).lower()
-                    if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
-                        # Graceful fallback: save everything except the image
-                        # Reload from DB to discard any partial changes including the failed photo
-                        profile = UserProfile.objects.get(pk=profile.pk)
-                        for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
-                            if field in request.POST:
-                                setattr(profile, field, request.POST[field])
-                        profile.save()
-                        
-                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
-                        return redirect('trip:user_portfolio')
                     
-                    messages.error(request, f"Image upload error: {str(e)}")
+                    # Graceful fallback: save everything except the image
+                    profile = UserProfile.objects.get(pk=profile.pk)
+                    for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
+                        if field in request.POST:
+                            setattr(profile, field, request.POST[field])
+                    profile.save()
+                    
+                    if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                        messages.warning(request, "Portfolio updated, but photo upload is restricted. (Cloudinary not configured)")
+                    else:
+                        messages.error(request, f"Image upload error: {str(e)}")
+                        
+                    return redirect('trip:user_portfolio')
             else:
                 messages.error(request, "Please correct the errors in the form.")
         else:

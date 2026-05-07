@@ -30,10 +30,19 @@ class Trip(models.Model):
     def get_profile_photo_url(self):
         if self.profile_photo:
             try:
-                return self.profile_photo.url
+                # Check if it's a Cloudinary URL (starts with http)
+                url = self.profile_photo.url
+                if url.startswith('http'):
+                    return url
+                
+                # If it's a local file, check if it exists on disk
+                from django.conf import settings
+                import os
+                if os.path.exists(os.path.join(settings.MEDIA_ROOT, self.profile_photo.name)):
+                    return url
             except:
                 pass
-        # Return base64 SVG as default
+        # Suitcase icon base64 fallback
         return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTIwIDZoLTRWNGMwLTEuMTEtLjg5LTItMi0yaC00Yy0xLjExIDAtMiAuODktMiAydjJINGMtMS4xMSAwLTEuOTkuODktMS45OSAyTDIgMTljMCAxLjExLjg5IDIgMiAyaDE2YzEuMTEgMCAyLS44OSAyLTJWOGMwLTEuMTEtLjg5LTItMi0yeiBNMTAgNGg0djJoLTRWNHptMTAgMTVINFY4aDE2djExeiIvPjwvc3ZnPg=='
 
     def get_reactions_count(self):
@@ -110,10 +119,19 @@ class UserProfile(models.Model):
     def get_profile_photo_url(self):
         if self.profile_photo:
             try:
-                return self.profile_photo.url
+                # Check if it's a Cloudinary URL (starts with http)
+                url = self.profile_photo.url
+                if url.startswith('http'):
+                    return url
+                
+                # If it's a local file, check if it exists on disk
+                from django.conf import settings
+                import os
+                if os.path.exists(os.path.join(settings.MEDIA_ROOT, self.profile_photo.name)):
+                    return url
             except:
                 pass
-        # Profile icon base64
+        # Profile icon base64 fallback
         return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgM3MtMy0xLjM0LTMtMyAxLjM0LTMgMy0zem0wIDE0LjJjLTIuNSAwLTQuNzEtMS4yOC02LTMuMjIuMDMtMS45OSA0LTMuMDggNi0zLjA4czUuOTcgMS4wOSA2IDMuMDhjLTEuMjkgMS45NC0zLjUgMy4yMi02IDMuMjJ6Ii8+PC9zdmc+'
     
     def get_featured_trips(self):
