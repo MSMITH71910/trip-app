@@ -82,12 +82,13 @@ if db_url:
         'default': dj_database_url.parse(db_url)
     }
 else:
-    # If no database URL is found, we fall back to SQLite for local dev
-    # but on Vercel this will cause the "unable to open database file" error
+    # WORKAROUND for Vercel: Use /tmp which is the only writable directory
+    # Note: Data will be lost when the Vercel instance restarts
+    db_path = os.path.join('/tmp', 'db.sqlite3')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'NAME': db_path,
         }
     }
 
