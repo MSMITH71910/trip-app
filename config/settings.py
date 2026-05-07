@@ -86,6 +86,11 @@ CLOUDINARY_STORAGE = {
 # Use Cloudinary for media files in production (if variables are set)
 if all([CLOUDINARY_STORAGE['CLOUD_NAME'], CLOUDINARY_STORAGE['API_KEY'], CLOUDINARY_STORAGE['API_SECRET']]):
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+elif os.getenv('VERCEL'):
+    # On Vercel, if Cloudinary is not set, we MUST NOT use FileSystemStorage
+    # because it will try to create the MEDIA_ROOT directory and crash.
+    # We'll use a dummy storage instead.
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.InMemoryStorage'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

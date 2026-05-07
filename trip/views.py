@@ -50,13 +50,17 @@ def health_check(request):
         ])
         
         try:
-            test_file = os.path.join(media_root, 'test_write.txt')
-            if not os.path.exists(media_root):
-                os.makedirs(media_root, exist_ok=True)
-            with open(test_file, 'w') as f:
-                f.write('test')
-            os.remove(test_file)
-            media_status = "Writable"
+            # We skip actual disk writing on Vercel as it is read-only
+            if os.getenv('VERCEL'):
+                media_status = "Read-only (Vercel)"
+            else:
+                test_file = os.path.join(media_root, 'test_write.txt')
+                if not os.path.exists(media_root):
+                    os.makedirs(media_root, exist_ok=True)
+                with open(test_file, 'w') as f:
+                    f.write('test')
+                os.remove(test_file)
+                media_status = "Writable"
         except Exception as e:
             media_status = f"Error: {str(e)}"
         
@@ -159,12 +163,14 @@ def profile(request):
                 error_msg = str(e).lower()
                 if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
                     # Graceful fallback: save everything except the image
-                    # We create a new form instance without the files to avoid the error on save
-                    form_no_files = UserProfileForm(request.POST, instance=profile)
-                    if form_no_files.is_valid():
-                        form_no_files.save()
-                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
-                        return redirect('trip:profile')
+                    # Update fields directly on the object to avoid storage interaction
+                    for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
+                        if field in request.POST:
+                            setattr(profile, field, request.POST[field])
+                    profile.save()
+                    
+                    messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+                    return redirect('trip:profile')
                 
                 messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -192,14 +198,15 @@ def trip_new(request):
                 print(f"Error saving trip: {str(e)}")
                 error_msg = str(e).lower()
                 if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
-                    # Fallback for Vercel
-                    form_no_files = TripForm(request.POST)
-                    if form_no_files.is_valid():
-                        trip = form_no_files.save(commit=False)
-                        trip.user = request.user
-                        trip.save()
-                        messages.warning(request, "Trip created, but your cover photo couldn't be uploaded. (Cloudinary storage not configured)")
-                        return redirect('trip:trip_detail', trip_id=trip.id)
+                    # Fallback for Vercel: Create trip object without image
+                    trip = Trip(user=request.user)
+                    for field in ['title', 'description', 'start_date', 'end_date']:
+                        if field in request.POST:
+                            setattr(trip, field, request.POST[field])
+                    trip.save()
+                    
+                    messages.warning(request, "Trip created, but your cover photo couldn't be uploaded. (Cloudinary storage not configured)")
+                    return redirect('trip:trip_detail', trip_id=trip.id)
                 
                 messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -742,11 +749,19 @@ def edit_portfolio(request):
                     error_msg = str(e).lower()
                     if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
                         # Graceful fallback: save everything except the image
-                        form_no_files = UserProfileForm(request.POST, instance=profile)
-                        if form_no_files.is_valid():
-                            form_no_files.save()
-                            messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
-                            return redirect('trip:user_portfolio')
+                        # We create a new form instance and EXCLUDE the photo field to be 100% safe
+                        profile_data = request.POST.copy()
+                        if 'profile_photo' in profile_data:
+                            del profile_data['profile_photo']
+                        
+                        # Update fields directly on the object to avoid storage interaction
+                        for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
+                            if field in request.POST:
+                                setattr(profile, field, request.POST[field])
+                        profile.save()
+                        
+                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+                        return redirect('trip:user_portfolio')
                     
                     messages.error(request, f"Image upload error: {str(e)}")
             else:
