@@ -157,7 +157,7 @@ def profile(request):
             except Exception as e:
                 print(f"Error saving profile photo: {str(e)}")
                 if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
                 else:
                     messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -184,7 +184,7 @@ def trip_new(request):
             except Exception as e:
                 print(f"Error saving trip: {str(e)}")
                 if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
                 else:
                     messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -323,7 +323,7 @@ def add_photo(request, trip_id):
             except Exception as e:
                 print(f"Error adding photo: {str(e)}")
                 if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
                 else:
                     messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -553,7 +553,7 @@ def update_trip_photo(request, trip_id):
             except Exception as e:
                 print(f"Error updating trip photo: {str(e)}")
                 if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
                 else:
                     messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -714,7 +714,7 @@ def edit_portfolio(request):
                 # Log the error and show a user-friendly message
                 print(f"Error saving portfolio: {str(e)}")
                 if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
                 else:
                     messages.error(request, f"An error occurred while saving: {str(e)}")
     else:

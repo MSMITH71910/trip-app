@@ -19,7 +19,9 @@
                         {% endif %}
                         <form method="POST" enctype="multipart/form-data" class="position-absolute bottom-0 end-0">
                             {% csrf_token %}
-                            <div class="d-none">{{ form.profile_photo }}</div>
+                            <div class="d-none">
+                                <input type="file" name="profile_photo" class="form-control" id="id_profile_photo">
+                            </div>
                             <button type="button" class="btn btn-primary rounded-circle shadow-sm p-2" style="width: 45px; height: 45px;" onclick="document.getElementById('id_profile_photo').click();">
                                 <i class="fas fa-camera"></i>
                             </button>
@@ -129,6 +131,9 @@
     {% endif %}
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
     document.getElementById('id_profile_photo').onchange = function() {
         document.getElementById('submit-photo').click();
