@@ -3,523 +3,390 @@
 
 {% block title %}{{ trip.title }} | Trip Planner{% endblock %}
 
+{% block extra_css %}
+<style>
+    .trip-hero {
+        position: relative;
+        height: 500px;
+        margin: -1.5rem -1rem 3rem -1rem;
+        overflow: hidden;
+        border-radius: 0 0 50px 50px;
+    }
+    .trip-hero-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(0.7);
+    }
+    .trip-hero-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 4rem 2rem;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        color: white;
+    }
+    .reaction-bar {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        padding: 1.2rem;
+        border: 1px solid var(--glass-border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: -2.5rem;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    .itinerary-timeline {
+        position: relative;
+        padding-left: 3rem;
+    }
+    .itinerary-timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--primary-gradient);
+        opacity: 0.2;
+    }
+    .itinerary-item {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    .itinerary-dot {
+        position: absolute;
+        left: -3rem;
+        top: 0.25rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: white;
+        border: 3px solid var(--primary-color);
+        border-radius: 50%;
+        z-index: 2;
+    }
+    .photo-grid-item {
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        aspect-ratio: 1/1;
+        cursor: pointer;
+    }
+    .photo-grid-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .photo-grid-item:hover img {
+        transform: scale(1.1);
+    }
+    .photo-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.5rem;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .photo-grid-item:hover .photo-overlay {
+        opacity: 1;
+    }
+    .budget-card {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        border-radius: 24px;
+    }
+    .comment-bubble {
+        background: var(--glass-bg);
+        border-radius: 20px;
+        border-top-left-radius: 2px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <!-- Trip Details Section -->
-    <div class="col-lg-8">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>{{ trip.title }}</h1>
-            <div>
-                <a href="{% url 'trip:profile' %}" class="btn btn-outline-secondary me-2">
-                    <i class="fas fa-arrow-left"></i> Back to My Trips
-                </a>
-                <div class="dropdown d-inline-block">
-                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-v"></i> Options
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="{% url 'trip:print_trip' trip_id=trip.id %}" target="_blank">
-                                <i class="fas fa-file-pdf"></i> Download as PDF
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'trip:add_photo' trip_id=trip.id %}">
-                                <i class="fas fa-camera"></i> Add Photo
-                            </a>
-                        </li>
-                        {% if is_owner %}
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="{% url 'trip:delete_trip' trip_id=trip.id %}">
-                                <i class="fas fa-trash"></i> Delete Trip
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </div>
+<div class="animate-fade-in">
+    <!-- Modern Hero Section -->
+    <div class="trip-hero shadow-lg">
+        {% if trip.profile_photo %}
+            <img src="{{ trip.profile_photo.url }}" class="trip-hero-img" alt="{{ trip.title }}">
+        {% else %}
+            <div class="trip-hero-img bg-primary"></div>
+        {% endif %}
         
-        <div class="card mb-4">
-            <div class="position-relative">
-                {% if trip.profile_photo %}
-                    <img src="{{ trip.profile_photo.url }}" class="card-img-top" alt="{{ trip.title }}">
-                {% else %}
-                    <img src="/static/trip/images/default-trip.svg" class="card-img-top" alt="{{ trip.title }}">
-                {% endif %}
-                
-                {% if is_owner %}
-                <div class="position-absolute bottom-0 end-0 p-2">
-                    <a href="{% url 'trip:update_trip_photo' trip_id=trip.id %}" class="btn btn-sm btn-primary rounded-pill">
-                        <i class="fas fa-camera"></i> Change Photo
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                <div class="d-flex justify-content-between mb-3">
-                    <h5 class="card-title">Trip Details</h5>
-                    
-                    <!-- Reactions -->
-                    <div class="reaction-buttons">
-                        {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                            <a href="{% url 'trip:react' trip_id=trip.id reaction_type=reaction_type %}" 
-                               class="btn btn-sm {% if user_reaction == reaction_type %}btn-primary{% else %}btn-outline-primary{% endif %} me-1">
-                                {% if reaction_type == 'LIKE' %}
-                                    <i class="fas fa-thumbs-up"></i>
-                                {% elif reaction_type == 'LOVE' %}
-                                    <i class="fas fa-heart"></i>
-                                {% elif reaction_type == 'AMAZING' %}
-                                    <i class="fas fa-star"></i>
-                                {% elif reaction_type == 'INTERESTING' %}
-                                    <i class="fas fa-lightbulb"></i>
-                                {% elif reaction_type == 'DISLIKE' %}
-                                    <i class="fas fa-thumbs-down"></i>
-                                {% elif reaction_type == 'BORING' %}
-                                    <i class="fas fa-meh"></i>
+        <div class="trip-hero-content">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-end flex-wrap gap-4">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-2">
+                                <li class="breadcrumb-item"><a href="{% url 'trip:explore' %}" class="text-white-50 text-decoration-none">Explore</a></li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">Trip Details</li>
+                            </ol>
+                        </nav>
+                        <h1 class="display-3 fw-800 mb-2">{{ trip.title }}</h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <a href="{% url 'trip:user_portfolio_by_username' username=trip.user.username %}" class="text-white text-decoration-none d-flex align-items-center">
+                                {% if trip.user.userprofile.profile_photo %}
+                                    <img src="{{ trip.user.userprofile.profile_photo.url }}" class="rounded-circle me-2 border border-2 border-white" width="32" height="32" alt="">
+                                {% else %}
+                                    <i class="fas fa-user-circle me-2 fa-lg"></i>
                                 {% endif %}
-                                {{ reaction_name }}
-                                <span class="badge bg-secondary">{{ reaction_counts|get_item:reaction_type }}</span>
+                                <span class="fw-600">by {{ trip.user.first_name|default:trip.user.username }}</span>
                             </a>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <p><strong><i class="far fa-calendar-alt"></i> Dates:</strong> {{ trip.start_date|date:"M d, Y" }} - {{ trip.end_date|date:"M d, Y" }}</p>
-                    <p><strong><i class="far fa-clock"></i> Duration:</strong> {{ trip.end_date|timeuntil:trip.start_date }}</p>
-                </div>
-                <div>
-                    <h6>Description:</h6>
-                    <p>{{ trip.description|linebreaks }}</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Itinerary Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> Itinerary</h5>
-                <a href="{% url 'trip:itinerary_add' trip_id=trip.id %}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-plus"></i> Add Item
-                </a>
-            </div>
-            <div class="card-body">
-                {% if itinerary_items %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Activity</th>
-                                    <th>Location</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in itinerary_items %}
-                                    <tr>
-                                        <td>{{ item.date|date:"M d, Y" }}</td>
-                                        <td>{{ item.time|time:"g:i A" }}</td>
-                                        <td>{{ item.activity }}</td>
-                                        <td>{{ item.location }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="text-center p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-calendar-day fa-3x text-muted"></i>
-                        </div>
-                        <p>No itinerary items yet.</p>
-                        <a href="{% url 'trip:itinerary_add' trip_id=trip.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add Your First Activity
-                        </a>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <!-- Photos Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                <h5 class="mb-0"><i class="fas fa-images me-2"></i> Photos</h5>
-                <a href="{% url 'trip:add_photo' trip_id=trip.id %}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-camera"></i> Add Photo
-                </a>
-            </div>
-            <div class="card-body">
-                {% if photos %}
-                    <div class="row g-4">
-                        {% for photo in photos %}
-                            <div class="col-lg-6 mb-4"> <!-- Increased to col-lg-6 to make wider -->
-                                <div class="card h-100 shadow-sm" style="overflow: hidden;">
-                                    <img src="{{ photo.photo.url }}" class="card-img-top" alt="{{ photo.caption }}" style="object-fit: cover; height: 250px;">
-                                    <div class="card-body pb-3">
-                                        <p class="card-text">{{ photo.caption }}</p>
-                                        <div class="d-flex flex-column">
-                                            <!-- Display date and selected reactions inline first -->
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <small class="text-muted">{{ photo.uploaded_at|date:"M d, Y" }}</small>
-                                                <div class="selected-reactions">
-                                                    {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                                                        {% with count=photo_reaction_counts|get_item:photo.id|get_item:reaction_type|default:"0" %}
-                                                            {% if count > 0 %}
-                                                                <span class="badge rounded-pill {% if reaction_type == 'LIKE' or reaction_type == 'LOVE' or reaction_type == 'AMAZING' or reaction_type == 'INTERESTING' %}bg-primary{% else %}bg-secondary{% endif %} me-1">
-                                                                    {% if reaction_type == 'LIKE' %}
-                                                                        <i class="fas fa-thumbs-up"></i>
-                                                                    {% elif reaction_type == 'LOVE' %}
-                                                                        <i class="fas fa-heart"></i>
-                                                                    {% elif reaction_type == 'AMAZING' %}
-                                                                        <i class="fas fa-star"></i>
-                                                                    {% elif reaction_type == 'INTERESTING' %}
-                                                                        <i class="fas fa-lightbulb"></i>
-                                                                    {% elif reaction_type == 'DISLIKE' %}
-                                                                        <i class="fas fa-thumbs-down"></i>
-                                                                    {% elif reaction_type == 'BORING' %}
-                                                                        <i class="fas fa-meh"></i>
-                                                                    {% endif %}
-                                                                    {{ count }}
-                                                                </span>
-                                                            {% endif %}
-                                                        {% endwith %}
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Moved buttons out of card-body into a card-footer for better spacing -->
-                                    <div class="card-footer bg-white pt-0 px-3"> <!-- Increased padding -->
-                                        <div class="d-flex justify-content-between align-items-center mt-2">
-                                            <div class="btn-group">
-                                                <a href="{% url 'trip:add_photo_comment' photo_id=photo.id %}" class="btn btn-sm btn-outline-secondary">
-                                                    <i class="fas fa-comment"></i> Comment
-                                                </a>
-                                                {% if photo.trip.user == user %}
-                                                <a href="{% url 'trip:delete_photo' photo_id=photo.id %}" class="btn btn-sm btn-outline-danger">
-                                                    <i class="fas fa-trash-alt"></i> Delete
-                                                </a>
-                                                {% endif %}
-                                            </div>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                    <i class="fas fa-smile"></i> React
-                                                </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end">
-                                                        {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                                                            <li>
-                                                                <a class="dropdown-item d-flex align-items-center" href="{% url 'trip:react_photo' photo_id=photo.id reaction_type=reaction_type %}">
-                                                                    <span class="me-2">
-                                                                    {% if reaction_type == 'LIKE' %}
-                                                                        <i class="fas fa-thumbs-up"></i>
-                                                                    {% elif reaction_type == 'LOVE' %}
-                                                                        <i class="fas fa-heart"></i>
-                                                                    {% elif reaction_type == 'AMAZING' %}
-                                                                        <i class="fas fa-star"></i>
-                                                                    {% elif reaction_type == 'INTERESTING' %}
-                                                                        <i class="fas fa-lightbulb"></i>
-                                                                    {% elif reaction_type == 'DISLIKE' %}
-                                                                        <i class="fas fa-thumbs-down"></i>
-                                                                    {% elif reaction_type == 'BORING' %}
-                                                                        <i class="fas fa-meh"></i>
-                                                                    {% endif %}
-                                                                    </span>
-                                                                    {{ reaction_name }}
-                                                                    <span class="badge bg-secondary">{{ photo_reaction_counts|get_item:photo.id|get_item:reaction_type|default:"0" }}</span>
-                                                                </a>
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                    <!-- Photo Comments Section -->
-                                    {% with photo_comments=photo.comments.all %}
-                                        {% if photo_comments %}
-                                            <div class="card-footer bg-light border-top px-3"> <!-- Added extra padding -->
-                                                <h6 class="text-muted"><i class="fas fa-comments"></i> Comments ({{ photo_comments|length }})</h6>
-                                                <div class="photo-comments-list">
-                                                        {% for comment in photo_comments %}
-                                                            <div class="comment-item py-2 border-bottom">
-                                                                <div class="d-flex justify-content-between">
-                                                                    <div class="d-flex align-items-center">
-                                                                        <small class="me-2"><strong>{{ comment.user.username }}</strong></small>
-                                                                        <small class="text-muted">{{ comment.created_at|date:"M d, Y" }}</small>
-                                                                    </div>
-                                                                    {% if comment.user == user %}
-                                                                    <div class="btn-group btn-group-sm">
-                                                                        <a href="{% url 'trip:edit_photo_comment' comment_id=comment.id %}" class="btn btn-outline-secondary py-0">
-                                                                            <i class="fas fa-edit"></i>
-                                                                        </a>
-                                                                        <a href="{% url 'trip:delete_photo_comment' comment_id=comment.id %}" class="btn btn-outline-danger py-0">
-                                                                            <i class="fas fa-trash"></i>
-                                                                        </a>
-                                                                    </div>
-                                                                    {% endif %}
-                                                                </div>
-                                                                <p class="mb-0 small">{{ comment.text }}</p>
-                                                                <!-- Photo Comment Reactions -->
-                                                                <div class="mt-1">
-                                                                    <div class="d-flex flex-column">
-                                                                        <!-- Display selected reactions inline -->
-                                                                        <div class="selected-reactions mb-1">
-                                                                            {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                                                                                {% with photo_comment_reactions=comment.reactions.all %}
-                                                                                    {% with count=photo_comment_reactions|filter_by_reaction:reaction_type %}
-                                                                                        {% if count > 0 %}
-                                                                                            <span class="badge rounded-pill {% if reaction_type == 'LIKE' or reaction_type == 'LOVE' or reaction_type == 'AMAZING' or reaction_type == 'INTERESTING' %}bg-primary{% else %}bg-secondary{% endif %} me-1">
-                                                                                                {% if reaction_type == 'LIKE' %}
-                                                                                                    <i class="fas fa-thumbs-up"></i>
-                                                                                                {% elif reaction_type == 'LOVE' %}
-                                                                                                    <i class="fas fa-heart"></i>
-                                                                                                {% elif reaction_type == 'AMAZING' %}
-                                                                                                    <i class="fas fa-star"></i>
-                                                                                                {% elif reaction_type == 'INTERESTING' %}
-                                                                                                    <i class="fas fa-lightbulb"></i>
-                                                                                                {% elif reaction_type == 'DISLIKE' %}
-                                                                                                    <i class="fas fa-thumbs-down"></i>
-                                                                                                {% elif reaction_type == 'BORING' %}
-                                                                                                    <i class="fas fa-meh"></i>
-                                                                                                {% endif %}
-                                                                                                {{ count }}
-                                                                                            </span>
-                                                                                        {% endif %}
-                                                                                    {% endwith %}
-                                                                                {% endwith %}
-                                                                            {% endfor %}
-                                                                        </div>
-                                                                        
-                                                                        <!-- React button with better alignment -->
-                                                                        <div class="d-flex justify-content-end mt-1">
-                                                                            <div class="dropdown">
-                                                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle py-0" type="button" data-bs-toggle="dropdown">
-                                                                                    <i class="fas fa-smile"></i> React
-                                                                                </button>
-                                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                                    {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                                                                                        <li>
-                                                                                            <a class="dropdown-item d-flex align-items-center" href="{% url 'trip:react_photo_comment' photo_comment_id=comment.id reaction_type=reaction_type %}">
-                                                                                                <span class="me-2">
-                                                                                                {% if reaction_type == 'LIKE' %}
-                                                                                                    <i class="fas fa-thumbs-up"></i>
-                                                                                                {% elif reaction_type == 'LOVE' %}
-                                                                                                    <i class="fas fa-heart"></i>
-                                                                                                {% elif reaction_type == 'AMAZING' %}
-                                                                                                    <i class="fas fa-star"></i>
-                                                                                                {% elif reaction_type == 'INTERESTING' %}
-                                                                                                    <i class="fas fa-lightbulb"></i>
-                                                                                                {% elif reaction_type == 'DISLIKE' %}
-                                                                                                    <i class="fas fa-thumbs-down"></i>
-                                                                                                {% elif reaction_type == 'BORING' %}
-                                                                                                    <i class="fas fa-meh"></i>
-                                                                                                {% endif %}
-                                                                                                </span>
-                                                                                                {{ reaction_name }}
-                                                                                                {% with photo_comment_reactions=comment.reactions.all %}
-                                                                                                    <span class="badge bg-secondary">{{ photo_comment_reactions|filter_by_reaction:reaction_type }}</span>
-                                                                                                {% endwith %}
-                                                                                            </a>
-                                                                                        </li>
-                                                                                    {% endfor %}
-                                                                                </ul>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                </div>
+                            <span class="opacity-50">|</span>
+                            <div class="fw-600">
+                                <i class="far fa-calendar-alt me-1"></i> {{ trip.start_date|date:"M d" }} - {{ trip.end_date|date:"M d, Y" }}
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-camera fa-3x text-muted"></i>
                         </div>
-                        <p>No photos added yet.</p>
-                        <a href="{% url 'trip:add_photo' trip_id=trip.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add Your First Photo
+                    </div>
+                    {% if is_owner %}
+                    <div class="mb-2">
+                        <a href="{% url 'trip:update_trip_photo' trip_id=trip.id %}" class="btn btn-light rounded-pill px-4 fw-600 shadow-sm">
+                            <i class="fas fa-camera me-2 text-primary"></i> Change Cover
                         </a>
                     </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <!-- Comments Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                <h5 class="mb-0"><i class="fas fa-comments me-2"></i> Comments</h5>
-                <a href="{% url 'trip:add_comment' trip_id=trip.id %}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-comment"></i> Add Comment
-                </a>
-            </div>
-            <div class="card-body">
-                {% if comments %}
-                    <div class="comments-list">
-                        {% for comment in comments %}
-                            <div class="comment mb-3 p-3 border-bottom">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <strong class="me-2">{{ comment.user.username }}</strong>
-                                        <small class="text-muted">{{ comment.created_at|date:"M d, Y" }}</small>
-                                    </div>
-                                    {% if comment.user == user %}
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'trip:edit_comment' comment_id=comment.id %}" class="btn btn-outline-secondary">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                        <a href="{% url 'trip:delete_comment' comment_id=comment.id %}" class="btn btn-outline-danger">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </a>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <p>{{ comment.text|linebreaks }}</p>
-                                <div class="comment-reactions mt-2">
-                                    <div class="d-flex flex-column">
-                                        <!-- Display selected reactions inline first -->
-                                        <div class="selected-reactions mb-2">
-                                            {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                                                {% with reaction_reactions=comment.reactions.all %}
-                                                    {% with count=reaction_reactions|filter_by_reaction:reaction_type %}
-                                                        {% if count > 0 %}
-                                                            <span class="badge rounded-pill {% if reaction_type == 'LIKE' or reaction_type == 'LOVE' or reaction_type == 'AMAZING' or reaction_type == 'INTERESTING' %}bg-primary{% else %}bg-secondary{% endif %} me-1">
-                                                                {% if reaction_type == 'LIKE' %}
-                                                                    <i class="fas fa-thumbs-up"></i>
-                                                                {% elif reaction_type == 'LOVE' %}
-                                                                    <i class="fas fa-heart"></i>
-                                                                {% elif reaction_type == 'AMAZING' %}
-                                                                    <i class="fas fa-star"></i>
-                                                                {% elif reaction_type == 'INTERESTING' %}
-                                                                    <i class="fas fa-lightbulb"></i>
-                                                                {% elif reaction_type == 'DISLIKE' %}
-                                                                    <i class="fas fa-thumbs-down"></i>
-                                                                {% elif reaction_type == 'BORING' %}
-                                                                    <i class="fas fa-meh"></i>
-                                                                {% endif %}
-                                                                {{ count }}
-                                                            </span>
-                                                        {% endif %}
-                                                    {% endwith %}
-                                                {% endwith %}
-                                            {% endfor %}
-                                        </div>
-                                        
-                                        <!-- React button with better alignment -->
-                                        <div class="d-flex justify-content-end mt-1">
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                    <i class="fas fa-smile"></i> React
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                    {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
-                                                        <li>
-                                                            <a class="dropdown-item d-flex align-items-center" href="{% url 'trip:react_comment' comment_id=comment.id reaction_type=reaction_type %}">
-                                                                <span class="me-2">
-                                                                {% if reaction_type == 'LIKE' %}
-                                                                    <i class="fas fa-thumbs-up"></i>
-                                                                {% elif reaction_type == 'LOVE' %}
-                                                                    <i class="fas fa-heart"></i>
-                                                                {% elif reaction_type == 'AMAZING' %}
-                                                                    <i class="fas fa-star"></i>
-                                                                {% elif reaction_type == 'INTERESTING' %}
-                                                                    <i class="fas fa-lightbulb"></i>
-                                                                {% elif reaction_type == 'DISLIKE' %}
-                                                                    <i class="fas fa-thumbs-down"></i>
-                                                                {% elif reaction_type == 'BORING' %}
-                                                                    <i class="fas fa-meh"></i>
-                                                                {% endif %}
-                                                                </span>
-                                                                {{ reaction_name }}
-                                                                {% with reaction_reactions=comment.reactions.all %}
-                                                                    <span class="badge bg-secondary">{{ reaction_reactions|filter_by_reaction:reaction_type }}</span>
-                                                                {% endwith %}
-                                                            </a>
-                                                        </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-comments fa-3x text-muted"></i>
-                        </div>
-                        <p>No comments yet.</p>
-                        <a href="{% url 'trip:add_comment' trip_id=trip.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add First Comment
-                        </a>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Sidebar -->
-    <div class="col-lg-4">
-        <!-- Budget Section -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                <h5 class="mb-0"><i class="fas fa-wallet me-2"></i> Budget</h5>
-                <a href="{% url 'trip:budget_add' trip_id=trip.id %}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-plus"></i> Add Item
+
+    <div class="container">
+        <!-- Reaction Bar -->
+        <div class="reaction-bar shadow-sm">
+            {% for reaction_type, reaction_name in trip.REACTION_CHOICES %}
+                <a href="{% url 'trip:react' trip_id=trip.id reaction_type=reaction_type %}" 
+                   class="btn btn-light rounded-pill px-3 py-2 fw-600 border-0 d-flex align-items-center gap-2 {% if user_reaction == reaction_type %}bg-primary text-white{% endif %} transition-all shadow-sm">
+                    <span style="font-size: 1.1rem;">
+                        {% if reaction_type == 'LIKE' %}👍
+                        {% elif reaction_type == 'LOVE' %}❤️
+                        {% elif reaction_type == 'AMAZING' %}✨
+                        {% elif reaction_type == 'INTERESTING' %}💡
+                        {% elif reaction_type == 'DISLIKE' %}👎
+                        {% elif reaction_type == 'BORING' %}😴
+                        {% endif %}
+                    </span>
+                    <span class="small">{{ reaction_name }}</span>
+                    <span class="badge {% if user_reaction == reaction_type %}bg-white text-primary{% else %}bg-light text-dark{% endif %} rounded-pill">
+                        {{ reaction_counts|get_item:reaction_type }}
+                    </span>
                 </a>
+            {% endfor %}
+            
+            <div class="ms-auto d-flex gap-2">
+                <a href="{% url 'trip:print_trip' trip_id=trip.id %}" class="btn btn-light rounded-circle shadow-sm" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;" title="Download PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                {% if is_owner %}
+                <a href="{% url 'trip:delete_trip' trip_id=trip.id %}" class="btn btn-light rounded-circle shadow-sm text-danger" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;" title="Delete Trip">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
             </div>
-            <div class="card-body">
-                {% if budget_items %}
-                    <div class="mb-3">
-                        <h6 class="text-center">Total Budget: ${{ total_budget }}</h6>
-                        <hr>
+        </div>
+
+        <div class="row mt-5 pt-4">
+            <!-- Left Column: Content -->
+            <div class="col-lg-8">
+                <!-- Description -->
+                <div class="glass-effect p-4 rounded-4 mb-5 border-0 shadow-sm animate-fade-in">
+                    <h4 class="fw-800 mb-3 text-primary"><i class="fas fa-info-circle me-2"></i> About this trip</h4>
+                    <p class="text-muted fs-5 mb-0">{{ trip.description|linebreaks }}</p>
+                </div>
+
+                <!-- Itinerary -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-800 mb-0">Itinerary</h3>
+                        {% if is_owner %}
+                        <a href="{% url 'trip:itinerary_add' trip_id=trip.id %}" class="btn btn-primary rounded-pill px-4 btn-sm fw-600">
+                            <i class="fas fa-plus me-1"></i> Add Activity
+                        </a>
+                        {% endif %}
                     </div>
                     
-                    <div class="list-group">
-                        {% for item in budget_items %}
-                            <div class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ item.description }}</h6>
-                                    <strong>${{ item.amount }}</strong>
+                    <div class="itinerary-timeline mt-4">
+                        {% if itinerary_items %}
+                            {% for item in itinerary_items %}
+                                <div class="itinerary-item animate-fade-in">
+                                    <div class="itinerary-dot shadow-sm"></div>
+                                    <div class="card border-0 rounded-4 shadow-sm hover-translate">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                                                <div>
+                                                    <span class="badge bg-primary rounded-pill mb-2 px-3 fw-600 shadow-sm">{{ item.time|time:"g:i A" }}</span>
+                                                    <h5 class="fw-800 mb-1 h4">{{ item.activity }}</h5>
+                                                    <p class="text-muted mb-0"><i class="fas fa-map-marker-alt me-1 text-danger"></i> {{ item.location }}</p>
+                                                </div>
+                                                <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-700">{{ item.date|date:"D, M d" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <small class="text-muted">{{ item.get_category_display }}</small>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center p-5 glass-effect rounded-4 border-0">
+                                <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                    <i class="fas fa-calendar-day fa-3x text-muted opacity-50"></i>
+                                </div>
+                                <h5 class="fw-700">No activities yet</h5>
+                                <p class="text-muted">Start building your adventure by adding activities.</p>
                             </div>
-                        {% endfor %}
+                        {% endif %}
                     </div>
-                {% else %}
-                    <div class="text-center p-4">
-                        <div class="mb-3">
-                            <i class="fas fa-money-bill-wave fa-3x text-muted"></i>
-                        </div>
-                        <p>No budget items yet.</p>
-                        <a href="{% url 'trip:budget_add' trip_id=trip.id %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add Your First Expense
+                </div>
+
+                <!-- Photo Gallery -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-800 mb-0">Captured Moments</h3>
+                        <a href="{% url 'trip:add_photo' trip_id=trip.id %}" class="btn btn-primary rounded-pill px-4 btn-sm fw-600">
+                            <i class="fas fa-camera me-1"></i> Add Photo
                         </a>
                     </div>
-                {% endif %}
+                    
+                    <div class="row g-3">
+                        {% if photos %}
+                            {% for photo in photos %}
+                                <div class="col-6 col-md-4">
+                                    <div class="photo-grid-item shadow-sm">
+                                        <img src="{{ photo.photo.url }}" alt="{{ photo.caption }}" class="loading-lazy">
+                                        <div class="photo-overlay d-flex flex-column justify-content-end">
+                                            <p class="small fw-700 mb-1">{{ photo.caption|truncatechars:40 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="small opacity-75">{{ photo.uploaded_at|date:"M d" }}</span>
+                                                <a href="{% url 'trip:add_photo_comment' photo_id=photo.id %}" class="btn btn-light btn-sm rounded-pill p-1 px-2 border-0 shadow-sm" style="font-size: 0.7rem;">
+                                                    <i class="fas fa-comment me-1 text-primary"></i> {{ photo.comments.count }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="col-12">
+                                <div class="text-center p-5 glass-effect rounded-4 border-0">
+                                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                        <i class="fas fa-images fa-3x text-muted opacity-50"></i>
+                                    </div>
+                                    <h5 class="fw-700">No memories shared</h5>
+                                    <p class="text-muted">Upload photos to share your journey with others.</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Budget & Stats -->
+            <div class="col-lg-4">
+                <!-- Budget Card -->
+                <div class="card budget-card shadow-lg mb-5 animate-fade-in">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 fw-800"><i class="fas fa-wallet me-2"></i> Trip Budget</h5>
+                            {% if is_owner %}
+                            <a href="{% url 'trip:budget_add' trip_id=trip.id %}" class="btn btn-light btn-sm rounded-pill px-3 fw-700" style="font-size: 0.7rem;">
+                                <i class="fas fa-plus me-1"></i> Add
+                            </a>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-center mb-4 bg-white bg-opacity-10 rounded-4 p-4 border border-white border-opacity-10">
+                            <small class="opacity-75 d-block mb-1 fw-600">Total Expenses</small>
+                            <h2 class="display-5 fw-800 mb-0">${{ total_budget|default:"0.00" }}</h2>
+                        </div>
+                        
+                        {% if budget_items %}
+                            <div class="budget-list" style="max-height: 300px; overflow-y: auto;">
+                                {% for item in budget_items %}
+                                    <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom border-white border-opacity-10 last-border-0">
+                                        <div>
+                                            <span class="badge bg-white text-primary rounded-pill mb-1" style="font-size: 0.6rem; opacity: 0.9;">{{ item.category }}</span>
+                                            <p class="mb-0 fw-600 small">{{ item.description }}</p>
+                                        </div>
+                                        <span class="fw-800">${{ item.amount }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-center small my-3 opacity-75">No expenses tracked yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Community / Comments Section -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden animate-fade-in">
+                    <div class="card-header bg-white p-4 border-bottom-0 pb-0">
+                        <h5 class="fw-800 mb-0 text-primary"><i class="fas fa-users me-2"></i> Community Feed</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="comments-list mb-4" style="max-height: 500px; overflow-y: auto;">
+                            {% if comments %}
+                                {% for comment in comments %}
+                                    <div class="d-flex gap-3 mb-4 animate-fade-in">
+                                        <a href="{% url 'trip:user_portfolio_by_username' username=comment.user.username %}" class="flex-shrink-0">
+                                            {% if comment.user.userprofile.profile_photo %}
+                                                <img src="{{ comment.user.userprofile.profile_photo.url }}" class="rounded-circle shadow-sm" width="40" height="40" alt="">
+                                            {% else %}
+                                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-user text-muted" style="font-size: 0.8rem;"></i>
+                                                </div>
+                                            {% endif %}
+                                        </a>
+                                        <div class="flex-grow-1">
+                                            <div class="p-3 comment-bubble shadow-sm">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <a href="{% url 'trip:user_portfolio_by_username' username=comment.user.username %}" class="text-decoration-none text-dark fw-800 small">{{ comment.user.first_name|default:comment.user.username }}</a>
+                                                    <span class="text-muted" style="font-size: 0.65rem;">{{ comment.created_at|timesince }} ago</span>
+                                                </div>
+                                                <p class="mb-0 small text-muted lh-sm">{{ comment.text }}</p>
+                                            </div>
+                                            <!-- Mini reactions for comments could go here -->
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-5 opacity-50">
+                                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                                        <i class="fas fa-comment-dots fa-2x"></i>
+                                    </div>
+                                    <p class="small mb-0 fw-600">No comments yet.</p>
+                                    <p class="small text-muted">Start the conversation!</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if user.is_authenticated %}
+                            <form action="{% url 'trip:add_comment' trip_id=trip.id %}" method="POST" class="mt-auto">
+                                {% csrf_token %}
+                                <div class="input-group shadow-sm bg-light rounded-pill p-1">
+                                    <input type="text" name="text" class="form-control border-0 bg-transparent px-3" placeholder="Write a comment..." required style="font-size: 0.85rem; box-shadow: none;">
+                                    <button class="btn btn-primary rounded-circle" type="submit" style="width: 36px; height: 36px; padding: 0;">
+                                        <i class="fas fa-paper-plane" style="font-size: 0.8rem;"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="text-center mt-3">
+                                <a href="{% url 'trip:login' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">Login to join the community</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add any trip-specific JavaScript here
-    });
-</script>
 {% endblock %}

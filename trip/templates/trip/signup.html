@@ -4,295 +4,166 @@
 
 {% block extra_css %}
 <style>
-    .signup-hero {
-        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
-        color: white;
-        padding: 3rem 0;
-        margin-bottom: 2rem;
-        border-radius: 15px;
-    }
-    .signup-card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    .auth-card {
+        border-radius: 32px;
         overflow: hidden;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
     }
-    .signup-card .card-header {
-        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
+    .auth-hero {
+        background: var(--primary-gradient);
         color: white;
-        border: none;
-        padding: 2rem;
-    }
-    .form-floating {
-        margin-bottom: 1rem;
-    }
-    .form-floating > .form-control {
-        border-radius: 10px;
-        border: 2px solid #e9ecef;
-        transition: all 0.3s ease;
-    }
-    .form-floating > .form-control:focus {
-        border-color: #4a1f93;
-        box-shadow: 0 0 0 0.2rem rgba(74, 31, 147, 0.25);
-    }
-    .form-floating > label {
-        color: #6c757d;
-    }
-    .terms-checkbox {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 10px;
-        border: 2px solid #e9ecef;
-        margin: 1rem 0;
-    }
-    .btn-signup {
-        background: linear-gradient(135deg, #4a1f93 0%, #6c5ce7 100%);
-        border: none;
-        border-radius: 10px;
-        padding: 12px 30px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-    }
-    .btn-signup:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(74, 31, 147, 0.4);
-    }
-    .feature-list {
-        background-color: #f8f9fa;
-        padding: 2rem;
-        border-radius: 15px;
-        margin-top: 2rem;
-    }
-    .feature-item {
+        padding: 4rem 3rem;
         display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
+        flex-direction: column;
+        justify-content: center;
     }
-    .feature-item i {
-        color: #4a1f93;
-        margin-right: 1rem;
-        font-size: 1.2rem;
-    }
-    .password-strength {
-        margin-top: 0.5rem;
-    }
-    .strength-bar {
-        height: 4px;
-        border-radius: 2px;
-        background-color: #e9ecef;
-        overflow: hidden;
-    }
-    .strength-fill {
-        height: 100%;
+    .form-control {
+        border-radius: 16px;
+        padding: 0.8rem 1.2rem;
+        border: 2px solid #f3f4f6;
+        background-color: #f9fafb;
         transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: var(--primary-color);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    .auth-btn {
+        border-radius: 16px;
+        padding: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        transition: all 0.3s ease;
+    }
+    .terms-box {
+        background-color: #f9fafb;
+        border-radius: 16px;
+        padding: 1.2rem;
+        border: 2px solid #f3f4f6;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <!-- Hero Section -->
-        <div class="signup-hero text-center">
-            <div class="container">
-                <h1 class="display-4 mb-3">
-                    <i class="fas fa-plane-departure"></i> Join Trip Planner
-                </h1>
-                <p class="lead mb-0">Start planning amazing adventures and share your travel experiences with the world!</p>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Registration Form -->
-            <div class="col-lg-8">
-                <div class="card signup-card">
-                    <div class="card-header text-center">
-                        <h3 class="mb-0">
-                            <i class="fas fa-user-plus"></i> Create Your Account
-                        </h3>
-                        <p class="mb-0 mt-2 opacity-75">Join thousands of travelers sharing their adventures</p>
+<div class="container py-5 animate-fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <div class="card auth-card shadow-lg border-0">
+                <div class="row g-0">
+                    <div class="col-md-5 auth-hero d-none d-md-flex">
+                        <div class="position-relative z-2">
+                            <h2 class="display-5 fw-800 mb-4 text-white">Join the global community.</h2>
+                            <p class="lead opacity-75 mb-5">Start planning amazing adventures and share your travel experiences with the world!</p>
+                            
+                            <div class="d-flex flex-column gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-white bg-opacity-20 rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-map-marked-alt text-white"></i>
+                                    </div>
+                                    <span class="fw-600">Smart trip planning tools</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-white bg-opacity-20 rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-camera text-white"></i>
+                                    </div>
+                                    <span class="fw-600">Share your best moments</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-white bg-opacity-20 rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-users text-white"></i>
+                                    </div>
+                                    <span class="fw-600">Connect with travelers</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="position-absolute bottom-0 end-0 opacity-10 p-4">
+                            <i class="fas fa-globe-americas fa-10x" style="transform: rotate(15deg);"></i>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="col-md-7 bg-white p-5">
+                        <div class="text-center mb-5 d-md-none">
+                            <h2 class="fw-800 text-primary">Join Us</h2>
+                        </div>
+                        
+                        <h3 class="fw-800 mb-2">Create Account</h3>
+                        <p class="text-muted mb-4">Fill in your details to get started.</p>
+                        
                         <form method="post" id="signupForm">
                             {% csrf_token %}
                             
-                            <div class="row">
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-6">
-                                    <div class="form-floating">
-                                        {{ form.first_name }}
-                                        <label for="{{ form.first_name.id_for_label }}">
-                                            <i class="fas fa-user"></i> {{ form.first_name.label }}
-                                        </label>
-                                        {% if form.first_name.help_text %}
-                                            <div class="form-text">{{ form.first_name.help_text }}</div>
-                                        {% endif %}
-                                        {% for error in form.first_name.errors %}
-                                            <div class="alert alert-danger mt-2">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
+                                    <label class="form-label fw-700 small text-uppercase tracking-wider">First Name</label>
+                                    {{ form.first_name }}
+                                    {% for error in form.first_name.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-floating">
-                                        {{ form.last_name }}
-                                        <label for="{{ form.last_name.id_for_label }}">
-                                            <i class="fas fa-user"></i> {{ form.last_name.label }}
-                                        </label>
-                                        {% if form.last_name.help_text %}
-                                            <div class="form-text">{{ form.last_name.help_text }}</div>
-                                        {% endif %}
-                                        {% for error in form.last_name.errors %}
-                                            <div class="alert alert-danger mt-2">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
+                                    <label class="form-label fw-700 small text-uppercase tracking-wider">Last Name</label>
+                                    {{ form.last_name }}
+                                    {% for error in form.last_name.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
                                 </div>
                             </div>
 
-                            <div class="form-floating">
+                            <div class="mb-3">
+                                <label class="form-label fw-700 small text-uppercase tracking-wider">Username</label>
                                 {{ form.username }}
-                                <label for="{{ form.username.id_for_label }}">
-                                    <i class="fas fa-at"></i> {{ form.username.label }}
-                                </label>
-                                {% if form.username.help_text %}
-                                    <div class="form-text">{{ form.username.help_text }}</div>
-                                {% endif %}
                                 {% for error in form.username.errors %}
-                                    <div class="alert alert-danger mt-2">{{ error }}</div>
+                                    <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
 
-                            <div class="form-floating">
+                            <div class="mb-3">
+                                <label class="form-label fw-700 small text-uppercase tracking-wider">Email Address</label>
                                 {{ form.email }}
-                                <label for="{{ form.email.id_for_label }}">
-                                    <i class="fas fa-envelope"></i> {{ form.email.label }}
-                                </label>
-                                {% if form.email.help_text %}
-                                    <div class="form-text">{{ form.email.help_text }}</div>
-                                {% endif %}
                                 {% for error in form.email.errors %}
-                                    <div class="alert alert-danger mt-2">{{ error }}</div>
+                                    <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
 
-                            <div class="form-floating">
-                                {{ form.password1 }}
-                                <label for="{{ form.password1.id_for_label }}">
-                                    <i class="fas fa-lock"></i> {{ form.password1.label }}
-                                </label>
-                                {% if form.password1.help_text %}
-                                    <div class="form-text">{{ form.password1.help_text }}</div>
-                                {% endif %}
-                                {% for error in form.password1.errors %}
-                                    <div class="alert alert-danger mt-2">{{ error }}</div>
-                                {% endfor %}
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-700 small text-uppercase tracking-wider">Password</label>
+                                    {{ form.password1 }}
+                                    {% for error in form.password1.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-700 small text-uppercase tracking-wider">Confirm</label>
+                                    {{ form.password2 }}
+                                    {% for error in form.password2.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
                             </div>
 
-                            <div class="form-floating">
-                                {{ form.password2 }}
-                                <label for="{{ form.password2.id_for_label }}">
-                                    <i class="fas fa-lock"></i> {{ form.password2.label }}
-                                </label>
-                                {% if form.password2.help_text %}
-                                    <div class="form-text">{{ form.password2.help_text }}</div>
-                                {% endif %}
-                                {% for error in form.password2.errors %}
-                                    <div class="alert alert-danger mt-2">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-
-                            <!-- Terms and Conditions -->
-                            <div class="terms-checkbox">
-                                <div class="form-check">
+                            <div class="terms-box mb-4">
+                                <div class="form-check d-flex align-items-center">
                                     {{ form.terms_accepted }}
-                                    <label class="form-check-label" for="{{ form.terms_accepted.id_for_label }}">
-                                        <strong>{{ form.terms_accepted.label }}</strong>
+                                    <label class="form-check-label ms-2 fw-600 small" for="{{ form.terms_accepted.id_for_label }}">
+                                        I agree to the <a href="{% url 'trip:terms_and_conditions' %}" target="_blank" class="text-primary text-decoration-none">Terms & Conditions</a>
                                     </label>
                                 </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        By creating an account, you agree to our 
-                                        <a href="{% url 'trip:terms_and_conditions' %}" target="_blank" class="text-primary">
-                                            <i class="fas fa-external-link-alt"></i> Terms and Conditions
-                                        </a>
-                                    </small>
-                                </div>
                                 {% for error in form.terms_accepted.errors %}
-                                    <div class="alert alert-danger mt-2">{{ error }}</div>
+                                    <div class="text-danger small mt-1">{{ error }}</div>
                                 {% endfor %}
                             </div>
                             
-                            <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-primary btn-signup btn-lg">
-                                    <i class="fas fa-rocket"></i> Create My Account
-                                </button>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 auth-btn mb-4 shadow-sm">
+                                Create My Account <i class="fas fa-rocket ms-2"></i>
+                            </button>
+                            
+                            <div class="text-center">
+                                <p class="text-muted mb-0">Already have an account? <a href="{% url 'trip:login' %}" class="text-primary fw-800 text-decoration-none">Log in here</a></p>
                             </div>
                         </form>
                     </div>
-                    <div class="card-footer bg-light text-center py-3">
-                        <p class="mb-0">
-                            Already have an account? 
-                            <a href="{% url 'trip:login' %}" class="text-primary fw-bold">
-                                <i class="fas fa-sign-in-alt"></i> Login here
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Features Sidebar -->
-            <div class="col-lg-4">
-                <div class="feature-list">
-                    <h4 class="text-primary mb-3">
-                        <i class="fas fa-star"></i> Why Join Trip Planner?
-                    </h4>
-                    
-                    <div class="feature-item">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <div>
-                            <strong>Plan Amazing Trips</strong><br>
-                            <small class="text-muted">Create detailed itineraries and manage your travel plans</small>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <i class="fas fa-wallet"></i>
-                        <div>
-                            <strong>Budget Tracking</strong><br>
-                            <small class="text-muted">Keep track of your travel expenses and stay within budget</small>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <i class="fas fa-camera"></i>
-                        <div>
-                            <strong>Share Memories</strong><br>
-                            <small class="text-muted">Upload photos and share your travel experiences</small>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <i class="fas fa-users"></i>
-                        <div>
-                            <strong>Connect with Travelers</strong><br>
-                            <small class="text-muted">Discover and interact with other travelers' adventures</small>
-                        </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <i class="fas fa-download"></i>
-                        <div>
-                            <strong>Export & Print</strong><br>
-                            <small class="text-muted">Download your trip details as PDF for offline access</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-center mt-3">
-                    <small class="text-muted">
-                        <i class="fas fa-shield-alt"></i> 
-                        Your data is secure and protected
-                    </small>
                 </div>
             </div>
         </div>
