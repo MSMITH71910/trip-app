@@ -1,13 +1,6 @@
 # 🌍 Trip Planner - Your Ultimate Travel Companion
 
-[![Django](https://img.shields.io/badge/Django-4.2+-green.svg)](https://www.djangoproject.com/)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.2.3-purple.svg)](https://getbootstrap.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
 A comprehensive Django web application for planning, organizing, and sharing your travel adventures. Create detailed trip itineraries, manage budgets, share photos, and connect with fellow travelers.
-
-![Trip Planner Home Page](./Trip_app_mainpage.png)
 
 ## ✨ Features
 
@@ -130,33 +123,19 @@ A comprehensive Django web application for planning, organizing, and sharing you
 
 ```
 trip-app/
-├── trip/                          # Main Django app
-│   ├── migrations/               # Database migrations
-│   ├── templates/trip/          # HTML templates
-│   │   ├── index.html           # Homepage with hero section
-│   │   ├── signup.html          # Enhanced user registration
-│   │   ├── login.html           # Modern login page
-│   │   ├── terms_and_conditions.html  # Legal terms
-│   │   ├── trip_detail.html     # Trip details page
-│   │   ├── trip_form.html       # Trip creation/editing
-│   │   └── ...                  # Other templates
-│   ├── static/trip/             # Static files (CSS, JS, images)
-│   ├── models.py                # Database models
-│   ├── views.py                 # View functions
-│   ├── forms.py                 # Django forms with validation
-│   ├── urls.py                  # URL patterns
-│   └── admin.py                 # Admin configuration
-├── templates/                    # Global templates
-│   └── base.html                # Enhanced base template
-├── media/                       # User uploaded files
-├── static/                      # Static files
-├── trip_planner/                # Django project settings
-│   ├── settings.py              # Project settings
-│   ├── urls.py                  # Main URL configuration
-│   └── wsgi.py                  # WSGI configuration
-├── manage.py                    # Django management script
-├── requirements.txt             # Python dependencies
-└── README.md                    # This file
+├── trips/                         # Main trip management app
+├── users/                         # User authentication and portfolios
+├── itineraries/                   # Day-by-day planning
+├── budgets/                       # Expense tracking
+├── photos/                        # Photo sharing and social features
+├── trip_planner/                  # Django project settings
+├── api/                           # Vercel entry point
+├── static/                        # Global static files
+├── templates/                     # Global templates
+├── manage.py                      # Django management script
+├── requirements.txt               # Python dependencies
+├── vercel.json                    # Vercel configuration
+└── README.md                      # This file
 ```
 
 ## 🎨 Design & UI
@@ -309,40 +288,17 @@ trip-app/
 python manage.py runserver
 ```
 
-### Vercel Deployment (Recommended)
+### Vercel Deployment
 
-This app is ready for Vercel deployment! See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed instructions.
-
-**Quick Vercel Deploy:**
 1. Push your code to GitHub
 2. Connect your GitHub repo to Vercel
 3. Set environment variables in Vercel dashboard:
    - `DJANGO_SECRET_KEY`
-   - `DJANGO_DEBUG=False`
+   - `DEBUG=False`
    - `DATABASE_URL` (PostgreSQL)
 4. Deploy automatically!
 
-### Heroku Deployment
-
-This app is also ready for Heroku deployment! See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
-
-**Quick Heroku Deploy:**
-```bash
-# Create Heroku app
-heroku create your-app-name
-
-# Add PostgreSQL
-heroku addons:create heroku-postgresql:mini
-
-# Set environment variables
-heroku config:set DJANGO_SECRET_KEY="your-secret-key"
-heroku config:set DJANGO_DEBUG=False
-heroku config:set HEROKU_APP_NAME=your-app-name
-
-# Deploy
-git push heroku main
-heroku run python manage.py migrate
-```
+Note: Media uploads (images) will not persist on Vercel's ephemeral filesystem. For production, use an external storage provider like Cloudinary or S3.
 
 ### Production Considerations
 
