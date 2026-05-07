@@ -4,7 +4,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-m+p2-=#$(r387lto-947g#hb+3t!)+3(vbfrkpt44@qbc+ep$2'
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -30,6 +30,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,3 +88,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
