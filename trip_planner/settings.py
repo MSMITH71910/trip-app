@@ -75,8 +75,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'trip_planner.wsgi.application'
 
 # Database
+# Recognize both DATABASE_URL and Vercel's POSTGRES_URL
 DATABASES = {
-    'default': env.db('DATABASE_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}')
+    'default': env.db('DATABASE_URL', default=env.db('POSTGRES_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}'))
 }
 
 AUTH_PASSWORD_VALIDATORS = [
