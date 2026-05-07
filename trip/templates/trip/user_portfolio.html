@@ -7,16 +7,17 @@
     .portfolio-hero {
         background: var(--primary-gradient);
         color: white;
-        padding: 6rem 0 8rem 0;
+        padding: 4rem 0 6rem 0;
         margin: -1.5rem -1rem 0 -1rem;
         border-radius: 0 0 50px 50px;
         position: relative;
         overflow: hidden;
+        z-index: 1;
     }
     .profile-avatar-container {
-        margin-top: -80px;
+        margin-top: -60px;
         position: relative;
-        z-index: 5;
+        z-index: 10;
     }
     .profile-avatar {
         width: 160px;
@@ -105,7 +106,7 @@
             <div class="col-lg-4 text-center text-lg-start">
                 <div class="profile-avatar-container mb-4">
                     {% if profile.profile_photo %}
-                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}" class="profile-avatar shadow-lg" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
+                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}" class="profile-avatar shadow-lg" onerror="this.src='/static/trip/images/default-profile.svg'; this.style.backgroundColor='#fff'; this.onerror=null;">
                     {% else %}
                         <div class="profile-avatar d-flex align-items-center justify-content-center bg-white shadow-lg text-primary">
                             <i class="fas fa-user fa-4x"></i>
