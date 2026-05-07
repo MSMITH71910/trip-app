@@ -162,7 +162,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 {% if user_profile and user_profile.profile_photo %}
-                                    <img src="{{ user_profile.profile_photo.url }}" width="30" height="30" class="rounded-circle me-2" style="background-color: #fff;" alt="" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
+                                    <img src="{{ user_profile.profile_photo.url }}" width="30" height="30" class="rounded-circle me-2" style="background-color: #fff;" alt="" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgM3MtMy0xLjM0LTMtMyAxLjM0LTMgMy0zem0wIDE0LjJjLTIuNSAwLTQuNzEtMS4yOC02LTMuMjIuMDMtMS45OSA0LTMuMDggNi0zLjA4czUuOTcgMS4wOSA2IDMuMDhjLTEuMjkgMS45NC0zLjUgMy4yMi02IDMuMjJ6Ii8+PC9zdmc+'; this.onerror=null;">
                                 {% else %}
                                     <i class="fas fa-user-circle me-2"></i>
                                 {% endif %}

@@ -148,6 +148,14 @@ def profile(request):
     try:
         trips = Trip.objects.filter(user=request.user)
         
+        # Ensure media root exists (especially on Vercel /tmp)
+        from django.conf import settings
+        if not os.path.exists(settings.MEDIA_ROOT):
+            try:
+                os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+            except Exception as e:
+                print(f"Warning: Could not create media root: {e}")
+
         # Get or create user profile
         profile, created = UserProfile.objects.get_or_create(user=request.user)
         
@@ -164,7 +172,8 @@ def profile(request):
                     error_msg = str(e).lower()
                     if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
                         # Graceful fallback: save everything except the image
-                        # Update fields directly on the object to avoid storage interaction
+                        # Reload from DB to discard any partial changes including the failed photo
+                        profile = UserProfile.objects.get(pk=profile.pk)
                         for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
                             if field in request.POST:
                                 setattr(profile, field, request.POST[field])
@@ -754,12 +763,8 @@ def edit_portfolio(request):
                     error_msg = str(e).lower()
                     if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
                         # Graceful fallback: save everything except the image
-                        # We create a new form instance and EXCLUDE the photo field to be 100% safe
-                        profile_data = request.POST.copy()
-                        if 'profile_photo' in profile_data:
-                            del profile_data['profile_photo']
-                        
-                        # Update fields directly on the object to avoid storage interaction
+                        # Reload from DB to discard any partial changes including the failed photo
+                        profile = UserProfile.objects.get(pk=profile.pk)
                         for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
                             if field in request.POST:
                                 setattr(profile, field, request.POST[field])

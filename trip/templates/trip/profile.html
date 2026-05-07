@@ -11,7 +11,7 @@
                 <div class="col-md-5 p-5 d-flex flex-column align-items-center justify-content-center text-center border-end" style="background: #f8f9fa;">
                     <div class="position-relative mb-4">
                         {% if profile.profile_photo %}
-                            <img src="{{ profile.profile_photo.url }}" class="rounded-circle border border-5 border-white shadow-lg" style="width: 180px; height: 180px; object-fit: cover; background-color: #fff;" alt="Profile Photo" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
+                            <img src="{{ profile.profile_photo.url }}" class="rounded-circle border border-5 border-white shadow-lg" style="width: 180px; height: 180px; object-fit: cover; background-color: #fff;" alt="Profile Photo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgM3MtMy0xLjM0LTMtMyAxLjM0LTMgMy0zem0wIDE0LjJjLTIuNSAwLTQuNzEtMS4yOC02LTMuMjIuMDMtMS45OSA0LTMuMDggNi0zLjA4czUuOTcgMS4wOSA2IDMuMDhjLTEuMjkgMS45NC0zLjUgMy4yMi02IDMuMjJ6Ii8+PC9zdmc+'; this.onerror=null;">
                         {% else %}
                             <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 180px; height: 180px;">
                                 <i class="fas fa-user fa-5x text-white"></i>

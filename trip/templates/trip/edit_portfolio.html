@@ -119,7 +119,7 @@
                         <div class="row mb-4">
                             <div class="col-md-4 text-center">
                                 {% if profile.profile_photo %}
-                                    <img src="{{ profile.profile_photo.url }}" alt="Current Photo" class="current-photo mb-3" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
+                                    <img src="{{ profile.profile_photo.url }}" alt="Current Photo" class="current-photo mb-3" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgM3MtMy0xLjM0LTMtMyAxLjM0LTMgMy0zem0wIDE0LjJjLTIuNSAwLTQuNzEtMS4yOC02LTMuMjIuMDMtMS45OSA0LTMuMDggNi0zLjA4czUuOTcgMS4wOSA2IDMuMDhjLTEuMjkgMS45NC0zLjUgMy4yMi02IDMuMjJ6Ii8+PC9zdmc+'; this.onerror=null;">
                                     <p class="text-muted small">Current Photo</p>
                                 {% else %}
                                     <div class="current-photo mx-auto mb-3 d-flex align-items-center justify-content-center bg-light">
