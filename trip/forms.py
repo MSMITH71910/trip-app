@@ -1,9 +1,17 @@
 # trip/forms.py
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Trip, ItineraryItem, BudgetItem, TripPhoto, Comment, PhotoComment, UserProfile, Reaction
+
+def validate_image_size(value):
+    # Vercel limit is 4.5MB, setting to 4MB for safety
+    filesize = value.size
+    if filesize > 4 * 1024 * 1024:
+        raise ValidationError("The maximum file size that can be uploaded is 4MB. Your image is too large for the server.")
+    return value
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -45,6 +53,11 @@ class SignUpForm(UserCreationForm):
         self.fields['password2'].help_text = 'Enter the same password as before, for verification.'
 
 class TripForm(forms.ModelForm):
+    profile_photo = forms.ImageField(
+        required=False,
+        validators=[validate_image_size],
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = Trip
         fields = ['title', 'description', 'start_date', 'end_date', 'profile_photo']
@@ -53,18 +66,24 @@ class TripForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'profile_photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
         
 class TripPhotoUpdateForm(forms.ModelForm):
+    profile_photo = forms.ImageField(
+        required=True,
+        validators=[validate_image_size],
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = Trip
         fields = ['profile_photo']
-        widgets = {
-            'profile_photo': forms.FileInput(attrs={'class': 'form-control'}),
-        }
 
 class UserProfileForm(forms.ModelForm):
+    profile_photo = forms.ImageField(
+        required=False,
+        validators=[validate_image_size],
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = UserProfile
         fields = [
@@ -72,7 +91,6 @@ class UserProfileForm(forms.ModelForm):
             'social_instagram', 'social_twitter', 'social_facebook'
         ]
         widgets = {
-            'profile_photo': forms.FileInput(attrs={'class': 'form-control'}),
             'bio': forms.Textarea(attrs={
                 'class': 'form-control', 
                 'rows': 4, 
@@ -172,12 +190,16 @@ class BudgetItemForm(forms.ModelForm):
 # ShareTripForm has been removed as we replaced Share Trip with Download as PDF
 
 class TripPhotoForm(forms.ModelForm):
+    photo = forms.ImageField(
+        required=True,
+        validators=[validate_image_size],
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = TripPhoto
         fields = ['photo', 'caption']
         widgets = {
             'caption': forms.TextInput(attrs={'class': 'form-control'}),
-            'photo': forms.FileInput(attrs={'class': 'form-control'})
         }
 
 class CommentForm(forms.ModelForm):
@@ -197,12 +219,14 @@ class PhotoCommentForm(forms.ModelForm):
         }
 
 class UserProfilePhotoForm(forms.ModelForm):
+    profile_photo = forms.ImageField(
+        required=True,
+        validators=[validate_image_size],
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = UserProfile
         fields = ['profile_photo']
-        widgets = {
-            'profile_photo': forms.FileInput(attrs={'class': 'form-control'})
-        }
         
 class ReactionForm(forms.ModelForm):
     class Meta:

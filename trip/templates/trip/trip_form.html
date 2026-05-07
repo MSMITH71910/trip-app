@@ -10,7 +10,7 @@
                 <h3 class="card-title mb-0">Create New Trip</h3>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data" id="trip-form">
                     {% csrf_token %}
                     
                     <div class="mb-3">
@@ -19,6 +19,17 @@
                         {% if form.title.errors %}
                             <div class="alert alert-danger mt-2">
                                 {{ form.title.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.profile_photo.id_for_label }}" class="form-label">Cover Photo (Optional)</label>
+                        {{ form.profile_photo }}
+                        <div class="form-text">Choose an image to represent your trip.</div>
+                        {% if form.profile_photo.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {{ form.profile_photo.errors }}
                             </div>
                         {% endif %}
                     </div>
@@ -81,11 +92,68 @@
                 }
             });
             
-            // Allow past dates for start date (no minimum restriction)
-            // This allows users to create trips for past dates (completed trips)
             if (startDateInput.value) {
                 endDateInput.min = startDateInput.value;
             }
+        }
+
+        // Image compression
+        const tripForm = document.getElementById('trip-form');
+        const fileInput = document.getElementById('{{ form.profile_photo.id_for_label }}');
+        
+        if (tripForm && fileInput) {
+            tripForm.onsubmit = function(event) {
+                if (!fileInput.files[0]) return true;
+                
+                const file = fileInput.files[0];
+                if (file.size < 1024 * 1024) return true;
+
+                event.preventDefault();
+                const form = this;
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 1200;
+
+                        if (width > height) {
+                            if (width > maxDim) {
+                                height *= maxDim / width;
+                                width = maxDim;
+                            }
+                        } else {
+                            if (height > maxDim) {
+                                width *= maxDim / height;
+                                height = maxDim;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob(function(blob) {
+                            const compressedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(compressedFile);
+                            fileInput.files = dataTransfer.files;
+
+                            form.submit();
+                        }, 'image/jpeg', 0.8);
+                    };
+                };
+            };
         }
     });
 </script>
