@@ -115,7 +115,7 @@
         <h1>{{ trip.title }}</h1>
         <p class="lead">{{ trip.start_date|date:"F d, Y" }} - {{ trip.end_date|date:"F d, Y" }} ({{ trip.end_date|timeuntil:trip.start_date }})</p>
         {% if trip.profile_photo %}
-            <img src="{{ trip.profile_photo.url }}" alt="{{ trip.title }}" style="max-height: 150px; margin: 1rem auto;">
+            <img src="{{ trip.profile_photo.url }}" alt="{{ trip.title }}" style="max-height: 150px; margin: 1rem auto;" onerror="this.src='/static/trip/images/default-trip.svg'; this.onerror=null;">
         {% endif %}
     </div>
     
@@ -211,7 +211,7 @@
                 {% for photo in photos %}
                     <div class="col-md-4 mb-4">
                         <div class="card h-100">
-                            <img src="{{ photo.photo.url }}" class="card-img-top" alt="{{ photo.caption }}" style="object-fit: cover; height: 150px;">
+                            <img src="{{ photo.photo.url }}" class="card-img-top" alt="{{ photo.caption }}" style="object-fit: cover; height: 150px;" onerror="this.src='/static/trip/images/default-trip.jpg'; this.onerror=null;">
                             <div class="card-body">
                                 <p class="card-text">{{ photo.caption }}</p>
                                 <small class="text-muted">Added on {{ photo.uploaded_at|date:"M d, Y" }}</small>

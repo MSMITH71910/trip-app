@@ -119,7 +119,7 @@
                         <div class="row mb-4">
                             <div class="col-md-4 text-center">
                                 {% if profile.profile_photo %}
-                                    <img src="{{ profile.profile_photo.url }}" alt="Current Photo" class="current-photo mb-3">
+                                    <img src="{{ profile.profile_photo.url }}" alt="Current Photo" class="current-photo mb-3" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
                                     <p class="text-muted small">Current Photo</p>
                                 {% else %}
                                     <div class="current-photo mx-auto mb-3 d-flex align-items-center justify-content-center bg-light">

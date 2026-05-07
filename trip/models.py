@@ -104,6 +104,11 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
     
+    def get_profile_photo_url(self):
+        if self.profile_photo:
+            return self.profile_photo.url
+        return '/static/trip/images/default-profile.svg'
+    
     def get_featured_trips(self):
         return self.featured_trips.all()[:3]  # Limit to 3 featured trips
     

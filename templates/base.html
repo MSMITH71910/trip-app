@@ -162,7 +162,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 {% if user_profile and user_profile.profile_photo %}
-                                    <img src="{{ user_profile.profile_photo.url }}" width="30" height="30" class="rounded-circle me-2" alt="">
+                                    <img src="{{ user_profile.profile_photo.url }}" width="30" height="30" class="rounded-circle me-2" alt="" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
                                 {% else %}
                                     <i class="fas fa-user-circle me-2"></i>
                                 {% endif %}

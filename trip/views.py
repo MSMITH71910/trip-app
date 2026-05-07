@@ -152,14 +152,21 @@ def profile(request):
         if form.is_valid():
             try:
                 form.save()
-                messages.success(request, 'Profile photo updated successfully!')
+                messages.success(request, 'Profile updated successfully!')
                 return redirect('trip:profile')
             except Exception as e:
-                print(f"Error saving profile photo: {str(e)}")
-                if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
-                else:
-                    messages.error(request, f"An error occurred: {str(e)}")
+                print(f"Error saving profile: {str(e)}")
+                error_msg = str(e).lower()
+                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                    # Graceful fallback: save everything except the image
+                    # We create a new form instance without the files to avoid the error on save
+                    form_no_files = UserProfileForm(request.POST, instance=profile)
+                    if form_no_files.is_valid():
+                        form_no_files.save()
+                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+                        return redirect('trip:profile')
+                
+                messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = UserProfileForm(instance=profile)
     
@@ -183,10 +190,18 @@ def trip_new(request):
                 return redirect('trip:trip_detail', trip_id=trip.id)
             except Exception as e:
                 print(f"Error saving trip: {str(e)}")
-                if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
-                else:
-                    messages.error(request, f"An error occurred: {str(e)}")
+                error_msg = str(e).lower()
+                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                    # Fallback for Vercel
+                    form_no_files = TripForm(request.POST)
+                    if form_no_files.is_valid():
+                        trip = form_no_files.save(commit=False)
+                        trip.user = request.user
+                        trip.save()
+                        messages.warning(request, "Trip created, but your cover photo couldn't be uploaded. (Cloudinary storage not configured)")
+                        return redirect('trip:trip_detail', trip_id=trip.id)
+                
+                messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = TripForm()
     return render(request, 'trip/trip_form.html', {'form': form})
@@ -322,8 +337,10 @@ def add_photo(request, trip_id):
                 return redirect('trip:trip_detail', trip_id=trip.id)
             except Exception as e:
                 print(f"Error adding photo: {str(e)}")
-                if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
+                error_msg = str(e).lower()
+                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                    messages.error(request, "Image upload failed. To enable photos, please configure Cloudinary storage in your Vercel settings.")
+                    return redirect('trip:trip_detail', trip_id=trip.id)
                 else:
                     messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -552,8 +569,9 @@ def update_trip_photo(request, trip_id):
                 return redirect('trip:trip_detail', trip_id=trip.id)
             except Exception as e:
                 print(f"Error updating trip photo: {str(e)}")
-                if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
+                error_msg = str(e).lower()
+                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                    messages.error(request, "Image upload failed. To enable photos, please configure Cloudinary storage in your Vercel settings.")
                 else:
                     messages.error(request, f"An error occurred: {str(e)}")
     else:
@@ -711,12 +729,18 @@ def edit_portfolio(request):
                 messages.success(request, 'Portfolio updated successfully!')
                 return redirect('trip:user_portfolio')
             except Exception as e:
-                # Log the error and show a user-friendly message
                 print(f"Error saving portfolio: {str(e)}")
-                if "Read-only file system" in str(e) or "Permission denied" in str(e):
-                    messages.error(request, "Error: Image upload failed. Vercel's filesystem is read-only. To enable image uploads, you MUST set up Cloudinary environment variables (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.")
-                else:
-                    messages.error(request, f"An error occurred while saving: {str(e)}")
+                # Check for common filesystem error strings or OSError
+                error_msg = str(e).lower()
+                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                    # Graceful fallback: save everything except the image
+                    form_no_files = UserProfileForm(request.POST, instance=profile)
+                    if form_no_files.is_valid():
+                        form_no_files.save()
+                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+                        return redirect('trip:user_portfolio')
+                
+                messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = UserProfileForm(instance=profile)
     

@@ -105,7 +105,7 @@
             <div class="col-lg-4 text-center text-lg-start">
                 <div class="profile-avatar-container mb-4">
                     {% if profile.profile_photo %}
-                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}" class="profile-avatar shadow-lg">
+                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}" class="profile-avatar shadow-lg" onerror="this.src='/static/trip/images/default-profile.svg'; this.onerror=null;">
                     {% else %}
                         <div class="profile-avatar d-flex align-items-center justify-content-center bg-white shadow-lg text-primary">
                             <i class="fas fa-user fa-4x"></i>
