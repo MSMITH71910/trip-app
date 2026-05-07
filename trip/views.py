@@ -725,10 +725,8 @@ def user_portfolio(request, username=None):
         return render(request, 'trip/user_portfolio.html', context)
     except Exception as fatal_e:
         print(f"FATAL ERROR in user_portfolio: {str(fatal_e)}")
-        if os.getenv('VERCEL'):
-             messages.error(request, f"A server error occurred: {str(fatal_e)}")
-             return redirect('trip:index')
-        raise fatal_e
+        messages.error(request, "A technical issue occurred. Please try again.")
+        return redirect('trip:index')
 
 @login_required
 def edit_portfolio(request):
@@ -774,12 +772,9 @@ def edit_portfolio(request):
         import traceback
         error_details = traceback.format_exc()
         print(f"FATAL ERROR in edit_portfolio: {error_details}")
-        # On Vercel, we can't see logs easily, so let's show the error if possible
-        # (Only in development or for debugging purposes)
-        if os.getenv('VERCEL'):
-             messages.error(request, f"A server error occurred: {str(fatal_e)}")
-             return redirect('trip:user_portfolio')
-        raise fatal_e
+        # Simply show a generic error to the user and stay on the page instead of potentially loop-redirecting
+        messages.error(request, "A technical issue occurred while loading this page. Please try again.")
+        return redirect('trip:profile')
 
 @login_required
 def user_settings(request):
@@ -806,10 +801,8 @@ def user_settings(request):
         return render(request, 'trip/user_settings.html', {'form': form, 'profile': profile})
     except Exception as fatal_e:
         print(f"FATAL ERROR in user_settings: {str(fatal_e)}")
-        if os.getenv('VERCEL'):
-             messages.error(request, f"A server error occurred: {str(fatal_e)}")
-             return redirect('trip:profile')
-        raise fatal_e
+        messages.error(request, "A technical issue occurred. Please try again.")
+        return redirect('trip:profile')
 
 def public_portfolio(request, username):
     """Public view of user portfolio."""

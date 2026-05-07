@@ -84,37 +84,14 @@ CLOUDINARY_STORAGE = {
 }
 
 # Use Cloudinary for media files in production (if variables are set)
+# Use Cloudinary for media files in production (if variables are set)
 if all([CLOUDINARY_STORAGE['CLOUD_NAME'], CLOUDINARY_STORAGE['API_KEY'], CLOUDINARY_STORAGE['API_SECRET']]):
-    STORAGES = {
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-elif os.getenv('VERCEL'):
-    # On Vercel, if Cloudinary is not set, we MUST NOT use FileSystemStorage
-    # because it will try to create the MEDIA_ROOT directory and crash.
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.InMemoryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-    # Also redirect MEDIA_ROOT to /tmp to avoid any mkdir attempts on read-only FS
-    MEDIA_ROOT = '/tmp/media'
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 else:
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# Static files configuration for deployment
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -211,17 +188,14 @@ STATICFILES_DIRS = [
 ]
 
 # Static files configuration for deployment
-# STATICFILES_STORAGE is now defined in STORAGES for Django 4.2+
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Additional static files directory for Vercel
 STATICFILES_BUILD_DIR = BASE_DIR / 'staticfiles_build'
 
 # Media files (User uploaded content)
 MEDIA_URL = '/media/'
-if not os.getenv('VERCEL'):
-    MEDIA_ROOT = BASE_DIR / 'media'
-# On Vercel, MEDIA_ROOT is set in the STORAGES section above to /tmp/media
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Security settings for production
 if not DEBUG:
