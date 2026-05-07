@@ -75,10 +75,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'trip_planner.wsgi.application'
 
 # Database
-# Recognize both DATABASE_URL and Vercel's POSTGRES_URL
-DATABASES = {
-    'default': env.db('DATABASE_URL', default=env.db('POSTGRES_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}'))
-}
+db_url = env('DATABASE_URL', default=env('POSTGRES_URL', default=None))
+
+if db_url:
+    DATABASES = {
+        'default': dj_database_url.parse(db_url)
+    }
+else:
+    # If no database URL is found, we fall back to SQLite for local dev
+    # but on Vercel this will cause the "unable to open database file" error
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
