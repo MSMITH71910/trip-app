@@ -1,6 +1,6 @@
 <div class="card trip-card h-100 border-0 shadow-sm animate-fade-in">
     <div class="card-img-wrapper">
-        <img src="{{ trip.get_profile_photo_url }}" alt="{{ trip.title }}" class="card-img-top" onerror="this.src='/static/trip/images/default-trip.svg'">
+        <img src="{{ trip.get_profile_photo_url }}" alt="{{ trip.title }}" class="card-img-top" onerror="this.src='/static/trip/images/default-trip.svg'; this.onerror=null;">
         <div class="position-absolute top-0 end-0 m-3">
             <span class="badge bg-white text-primary rounded-pill shadow-sm px-3 py-2">
                 {% if trip.is_past_trip %}

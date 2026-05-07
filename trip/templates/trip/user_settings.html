@@ -305,7 +305,7 @@
                         <div class="featured-trips-grid">
                             {% for trip in form.featured_trips.field.queryset %}
                                 <div class="trip-checkbox-card" onclick="toggleTripSelection({{ trip.id }})">
-                                    <img src="{{ trip.get_profile_photo_url }}" alt="{{ trip.title }}" onerror="this.src='/static/trip/images/default-trip.jpg'; this.onerror=null;">
+                                    <img src="{{ trip.get_profile_photo_url }}" alt="{{ trip.title }}" onerror="this.src='/static/trip/images/default-trip.svg'; this.onerror=null;">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="featured_trips" value="{{ trip.id }}" id="trip_{{ trip.id }}"
                                                {% if trip in profile.featured_trips.all %}checked{% endif %}>
