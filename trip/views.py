@@ -6,7 +6,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.urls import reverse
 from django.http import JsonResponse
-from django.db import connection
+from django.db import connection, models
 import os
 
 from .models import Trip, ItineraryItem, BudgetItem, TripPhoto, Comment, PhotoComment, Reaction, UserProfile
@@ -37,11 +37,35 @@ def health_check(request):
                 db_status = "OK"
         except Exception as db_e:
             db_status = f"ERROR: {str(db_e)}"
+            
+        # Test media directory writability
+        from django.conf import settings
+        media_root = settings.MEDIA_ROOT
+        
+        # Check Cloudinary configuration
+        cloudinary_configured = all([
+            os.getenv('CLOUDINARY_CLOUD_NAME'),
+            os.getenv('CLOUDINARY_API_KEY'),
+            os.getenv('CLOUDINARY_API_SECRET')
+        ])
+        
+        try:
+            test_file = os.path.join(media_root, 'test_write.txt')
+            if not os.path.exists(media_root):
+                os.makedirs(media_root, exist_ok=True)
+            with open(test_file, 'w') as f:
+                f.write('test')
+            os.remove(test_file)
+            media_status = "Writable"
+        except Exception as e:
+            media_status = f"Error: {str(e)}"
         
         return JsonResponse({
             'status': 'OK',
             'django': django_status,
             'database': db_status,
+            'media_directory': media_status,
+            'cloudinary_configured': cloudinary_configured,
             'environment': {
                 'DEBUG': os.getenv('DJANGO_DEBUG', 'Not Set'),
                 'DATABASE_URL': 'Set' if os.getenv('DATABASE_URL') else 'Not Set',
@@ -126,9 +150,16 @@ def profile(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile photo updated successfully!')
-            return redirect('trip:profile')
+            try:
+                form.save()
+                messages.success(request, 'Profile photo updated successfully!')
+                return redirect('trip:profile')
+            except Exception as e:
+                print(f"Error saving profile photo: {str(e)}")
+                if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                else:
+                    messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = UserProfileForm(instance=profile)
     
@@ -142,18 +173,24 @@ def profile(request):
 def trip_new(request):
     """Create a new trip."""
     if request.method == 'POST':
-        form = TripForm(request.POST)
+        form = TripForm(request.POST, request.FILES)
         if form.is_valid():
-            trip = form.save(commit=False)
-            trip.user = request.user
-            trip.save()
-            messages.success(request, 'Trip created successfully!')
-            return redirect('trip:trip_detail', trip_id=trip.id)
+            try:
+                trip = form.save(commit=False)
+                trip.user = request.user
+                trip.save()
+                messages.success(request, 'Trip created successfully!')
+                return redirect('trip:trip_detail', trip_id=trip.id)
+            except Exception as e:
+                print(f"Error saving trip: {str(e)}")
+                if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                else:
+                    messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = TripForm()
     return render(request, 'trip/trip_form.html', {'form': form})
 
-@login_required
 def trip_detail(request, trip_id):
     """View trip details."""
     # Allow access to any trip, not just user's own trips
@@ -164,16 +201,19 @@ def trip_detail(request, trip_id):
     comments = Comment.objects.filter(trip=trip)
     
     # Determine if the current user is the owner of the trip
-    is_owner = (trip.user == request.user)
+    is_owner = False
+    if request.user.is_authenticated:
+        is_owner = (trip.user == request.user)
     
     # Prefetch photo comments to improve performance
     photos = photos.prefetch_related('comments', 'comments__user')
     
     # Get the user's current reaction to this trip (if any)
     user_reaction = None
-    user_reaction_obj = Reaction.objects.filter(user=request.user, trip=trip).first()
-    if user_reaction_obj:
-        user_reaction = user_reaction_obj.reaction_type
+    if request.user.is_authenticated:
+        user_reaction_obj = Reaction.objects.filter(user=request.user, trip=trip).first()
+        if user_reaction_obj:
+            user_reaction = user_reaction_obj.reaction_type
     
     # Get reaction counts by type for the trip
     reaction_counts = {}
@@ -274,11 +314,18 @@ def add_photo(request, trip_id):
     if request.method == 'POST':
         form = TripPhotoForm(request.POST, request.FILES)
         if form.is_valid():
-            photo = form.save(commit=False)
-            photo.trip = trip
-            photo.save()
-            messages.success(request, 'Photo added successfully!')
-            return redirect('trip:trip_detail', trip_id=trip.id)
+            try:
+                photo = form.save(commit=False)
+                photo.trip = trip
+                photo.save()
+                messages.success(request, 'Photo added successfully!')
+                return redirect('trip:trip_detail', trip_id=trip.id)
+            except Exception as e:
+                print(f"Error adding photo: {str(e)}")
+                if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                else:
+                    messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = TripPhotoForm()
     
@@ -335,12 +382,20 @@ def react(request, trip_id, reaction_type):
     
     return redirect('trip:trip_detail', trip_id=trip.id)
 
-@login_required
 def explore(request):
     """View for exploring all trips."""
-    trips = Trip.objects.all().order_by('-created_at')
+    query = request.GET.get('q')
+    if query:
+        trips = Trip.objects.filter(
+            models.Q(title__icontains=query) | 
+            models.Q(description__icontains=query)
+        ).order_by('-created_at')
+    else:
+        trips = Trip.objects.all().order_by('-created_at')
+        
     return render(request, 'trip/explore.html', {
-        'trips': trips
+        'trips': trips,
+        'query': query
     })
 
 def react_photo(request, photo_id, reaction_type):
@@ -491,9 +546,16 @@ def update_trip_photo(request, trip_id):
     if request.method == 'POST':
         form = TripPhotoUpdateForm(request.POST, request.FILES, instance=trip)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Trip photo updated successfully!')
-            return redirect('trip:trip_detail', trip_id=trip.id)
+            try:
+                form.save()
+                messages.success(request, 'Trip photo updated successfully!')
+                return redirect('trip:trip_detail', trip_id=trip.id)
+            except Exception as e:
+                print(f"Error updating trip photo: {str(e)}")
+                if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                else:
+                    messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = TripPhotoUpdateForm(instance=trip)
     
@@ -599,12 +661,13 @@ def edit_photo_comment(request, comment_id):
     
     return render(request, 'trip/edit_photo_comment.html', {'form': form, 'comment': comment, 'photo': photo, 'trip': trip})
 
-@login_required
 def user_portfolio(request, username=None):
     """Display user portfolio page."""
     if username:
         user = get_object_or_404(User, username=username)
     else:
+        if not request.user.is_authenticated:
+            return redirect('trip:login')
         user = request.user
     
     # Get or create user profile
@@ -643,9 +706,17 @@ def edit_portfolio(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Portfolio updated successfully!')
-            return redirect('trip:user_portfolio')
+            try:
+                form.save()
+                messages.success(request, 'Portfolio updated successfully!')
+                return redirect('trip:user_portfolio')
+            except Exception as e:
+                # Log the error and show a user-friendly message
+                print(f"Error saving portfolio: {str(e)}")
+                if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                    messages.error(request, "Error: Image upload failed due to server restrictions. Please set up Cloudinary for image storage.")
+                else:
+                    messages.error(request, f"An error occurred while saving: {str(e)}")
     else:
         form = UserProfileForm(instance=profile)
     

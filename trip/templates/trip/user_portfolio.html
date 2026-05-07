@@ -131,11 +131,18 @@
                     </div>
 
                     {% if is_own_profile %}
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'trip:edit_portfolio' %}" class="btn btn-primary rounded-pill py-3 fw-700 shadow-sm">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trip:edit_portfolio' %}" class="btn btn-primary rounded-pill py-3 fw-700 shadow-sm flex-grow-1">
                                 <i class="fas fa-edit me-2"></i> Edit Portfolio
                             </a>
+                            <button onclick="copyTripUrl()" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
                         </div>
+                    {% else %}
+                        <button onclick="copyTripUrl()" class="btn btn-primary rounded-pill py-3 fw-700 shadow-sm w-100">
+                            <i class="fas fa-share-alt me-2"></i> Share Portfolio
+                        </button>
                     {% endif %}
                 </div>
             </div>
@@ -207,4 +214,24 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyTripUrl() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed bottom-0 start-50 translate-middle-x mb-5 bg-dark text-white p-3 rounded-pill shadow-lg animate-fade-in';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i> Link copied to clipboard!';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        });
+    }
+</script>
 {% endblock %}

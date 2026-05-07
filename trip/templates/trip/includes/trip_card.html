@@ -22,7 +22,7 @@
             {% endif %}
             <div class="lh-1">
                 <small class="d-block text-muted fw-600" style="font-size: 0.75rem;">Created by</small>
-                <a href="{% url 'trip:user_portfolio_by_username' username=trip.user.username %}" class="text-decoration-none fw-700 text-dark" style="font-size: 0.9rem;">
+                <a href="{% url 'trip:public_portfolio' username=trip.user.username %}" class="text-decoration-none fw-700 text-dark" style="font-size: 0.9rem;">
                     {{ trip.user.first_name|default:trip.user.username }}
                 </a>
             </div>
@@ -36,7 +36,10 @@
                     <i class="far fa-calendar-alt me-1"></i> {{ trip.start_date|date:"M Y" }}
                 </div>
                 <div class="text-muted small">
-                    <i class="fas fa-camera me-1"></i> {{ trip.photos.count }} photos
+                    <i class="fas fa-heart text-danger me-1"></i> {{ trip.get_reactions_count }}
+                </div>
+                <div class="text-muted small">
+                    <i class="fas fa-camera me-1"></i> {{ trip.tripphoto_set.count }} photos
                 </div>
             </div>
             <a href="{% url 'trip:trip_detail' trip_id=trip.id %}" class="btn btn-primary w-100 rounded-pill fw-600">

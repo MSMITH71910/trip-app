@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Trip(models.Model):
     REACTION_CHOICES = [
@@ -40,6 +41,15 @@ class Trip(models.Model):
         for choice in self.REACTION_CHOICES:
             reaction_counts[choice[0]] = self.reactions.filter(reaction_type=choice[0]).count()
         return reaction_counts
+
+    def is_past_trip(self):
+        return self.end_date < timezone.now().date()
+
+    def is_upcoming_trip(self):
+        return self.start_date > timezone.now().date()
+
+    def is_current_trip(self):
+        return self.start_date <= timezone.now().date() <= self.end_date
 
     class Meta:
         ordering = ['-start_date']
