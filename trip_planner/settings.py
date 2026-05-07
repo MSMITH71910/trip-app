@@ -84,11 +84,14 @@ if db_url:
 else:
     # WORKAROUND for Vercel: Use /tmp which is the only writable directory
     # Note: Data will be lost when the Vercel instance restarts
-    db_path = os.path.join('/tmp', 'db.sqlite3')
+    db_path = '/tmp/db.sqlite3'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': db_path,
+            'OPTIONS': {
+                'timeout': 20,
+            }
         }
     }
 
