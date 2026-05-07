@@ -681,91 +681,120 @@ def edit_photo_comment(request, comment_id):
 
 def user_portfolio(request, username=None):
     """Display user portfolio page."""
-    if username:
-        user = get_object_or_404(User, username=username)
-    else:
-        if not request.user.is_authenticated:
-            return redirect('trip:login')
-        user = request.user
-    
-    # Get or create user profile
-    profile, created = UserProfile.objects.get_or_create(user=user)
-    
-    # Check if the requesting user can view this profile
-    if not profile.can_view_profile(request.user):
-        messages.error(request, 'This profile is private.')
-        return redirect('trip:index')
-    
-    # Get user's trips if they can be viewed
-    trips = []
-    if profile.can_view_trips(request.user):
-        trips = Trip.objects.filter(user=user).order_by('-created_at')
-    
-    # Get featured trips
-    featured_trips = profile.get_featured_trips()
-    
-    context = {
-        'profile_user': user,
-        'profile': profile,
-        'trips': trips,
-        'featured_trips': featured_trips,
-        'trip_count': profile.get_trip_count() if profile.show_trip_count else None,
-        'photo_count': profile.get_photo_count(),
-        'is_own_profile': request.user == user,
-    }
-    
-    return render(request, 'trip/user_portfolio.html', context)
+    try:
+        if username:
+            user = get_object_or_404(User, username=username)
+        else:
+            if not request.user.is_authenticated:
+                return redirect('trip:login')
+            user = request.user
+        
+        # Get or create user profile
+        profile, created = UserProfile.objects.get_or_create(user=user)
+        
+        # Check if the requesting user can view this profile
+        if not profile.can_view_profile(request.user):
+            messages.error(request, 'This profile is private.')
+            return redirect('trip:index')
+        
+        # Get user's trips if they can be viewed
+        trips = []
+        if profile.can_view_trips(request.user):
+            trips = Trip.objects.filter(user=user).order_by('-created_at')
+        
+        # Get featured trips
+        featured_trips = profile.get_featured_trips()
+        
+        context = {
+            'profile_user': user,
+            'profile': profile,
+            'trips': trips,
+            'featured_trips': featured_trips,
+            'trip_count': profile.get_trip_count() if profile.show_trip_count else None,
+            'photo_count': profile.get_photo_count(),
+            'is_own_profile': request.user == user,
+        }
+        
+        return render(request, 'trip/user_portfolio.html', context)
+    except Exception as fatal_e:
+        print(f"FATAL ERROR in user_portfolio: {str(fatal_e)}")
+        if os.getenv('VERCEL'):
+             messages.error(request, f"A server error occurred: {str(fatal_e)}")
+             return redirect('trip:index')
+        raise fatal_e
 
 @login_required
 def edit_portfolio(request):
     """Edit user portfolio information."""
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-    
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            try:
-                form.save()
-                messages.success(request, 'Portfolio updated successfully!')
-                return redirect('trip:user_portfolio')
-            except Exception as e:
-                print(f"Error saving portfolio: {str(e)}")
-                # Check for common filesystem error strings or OSError
-                error_msg = str(e).lower()
-                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
-                    # Graceful fallback: save everything except the image
-                    form_no_files = UserProfileForm(request.POST, instance=profile)
-                    if form_no_files.is_valid():
-                        form_no_files.save()
-                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
-                        return redirect('trip:user_portfolio')
-                
-                messages.error(request, f"An error occurred: {str(e)}")
-    else:
-        form = UserProfileForm(instance=profile)
-    
-    return render(request, 'trip/edit_portfolio.html', {'form': form, 'profile': profile})
+    try:
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        
+        if request.method == 'POST':
+            form = UserProfileForm(request.POST, request.FILES, instance=profile)
+            if form.is_valid():
+                try:
+                    form.save()
+                    messages.success(request, 'Portfolio updated successfully!')
+                    return redirect('trip:user_portfolio')
+                except Exception as e:
+                    print(f"Error saving portfolio: {str(e)}")
+                    # Check for common filesystem error strings or OSError
+                    error_msg = str(e).lower()
+                    if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                        # Graceful fallback: save everything except the image
+                        form_no_files = UserProfileForm(request.POST, instance=profile)
+                        if form_no_files.is_valid():
+                            form_no_files.save()
+                            messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+                            return redirect('trip:user_portfolio')
+                    
+                    messages.error(request, f"Image upload error: {str(e)}")
+            else:
+                messages.error(request, "Please correct the errors in the form.")
+        else:
+            form = UserProfileForm(instance=profile)
+        
+        return render(request, 'trip/edit_portfolio.html', {'form': form, 'profile': profile})
+    except Exception as fatal_e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"FATAL ERROR in edit_portfolio: {error_details}")
+        # On Vercel, we can't see logs easily, so let's show the error if possible
+        # (Only in development or for debugging purposes)
+        if os.getenv('VERCEL'):
+             messages.error(request, f"A server error occurred: {str(fatal_e)}")
+             return redirect('trip:user_portfolio')
+        raise fatal_e
 
 @login_required
 def user_settings(request):
     """User settings page."""
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-    
-    if request.method == 'POST':
-        form = UserSettingsForm(request.POST, instance=profile, user=request.user)
-        if form.is_valid():
-            # Clear existing featured trips and set new ones
-            profile.featured_trips.clear()
-            for trip in form.cleaned_data['featured_trips']:
-                profile.featured_trips.add(trip)
-            
-            form.save()
-            messages.success(request, 'Settings updated successfully!')
-            return redirect('trip:user_settings')
-    else:
-        form = UserSettingsForm(instance=profile, user=request.user)
-    
-    return render(request, 'trip/user_settings.html', {'form': form, 'profile': profile})
+    try:
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        
+        if request.method == 'POST':
+            form = UserSettingsForm(request.POST, instance=profile, user=request.user)
+            if form.is_valid():
+                # Clear existing featured trips and set new ones
+                profile.featured_trips.clear()
+                for trip in form.cleaned_data['featured_trips']:
+                    profile.featured_trips.add(trip)
+                
+                form.save()
+                messages.success(request, 'Settings updated successfully!')
+                return redirect('trip:user_settings')
+            else:
+                messages.error(request, "Please correct the errors in the form.")
+        else:
+            form = UserSettingsForm(instance=profile, user=request.user)
+        
+        return render(request, 'trip/user_settings.html', {'form': form, 'profile': profile})
+    except Exception as fatal_e:
+        print(f"FATAL ERROR in user_settings: {str(fatal_e)}")
+        if os.getenv('VERCEL'):
+             messages.error(request, f"A server error occurred: {str(fatal_e)}")
+             return redirect('trip:profile')
+        raise fatal_e
 
 def public_portfolio(request, username):
     """Public view of user portfolio."""
