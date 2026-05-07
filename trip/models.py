@@ -29,9 +29,12 @@ class Trip(models.Model):
         
     def get_profile_photo_url(self):
         if self.profile_photo:
-            return self.profile_photo.url
-        # Return a default image URL if no profile photo is set
-        return '/static/trip/images/default-trip.svg'
+            try:
+                return self.profile_photo.url
+            except:
+                pass
+        # Return base64 SVG as default
+        return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTIwIDZoLTRWNGMwLTEuMTEtLjg5LTItMi0yaC00Yy0xLjExIDAtMiAuODktMiAydjJINGMtMS4xMSAwLTEuOTkuODktMS45OSAyTDIgMTljMCAxLjExLjg5IDIgMiAyaDE2YzEuMTEgMCAyLS44OSAyLTJWOGMwLTEuMTEtLjg5LTItMi0yeiBNMTAgNGg0djJoLTRWNHptMTAgMTVINFY4aDE2djExeiIvPjwvc3ZnPg=='
 
     def get_reactions_count(self):
         return self.reactions.count()
@@ -106,8 +109,12 @@ class UserProfile(models.Model):
     
     def get_profile_photo_url(self):
         if self.profile_photo:
-            return self.profile_photo.url
-        return '/static/trip/images/default-profile.svg'
+            try:
+                return self.profile_photo.url
+            except:
+                pass
+        # Profile icon base64
+        return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NiZDVlMSI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgM3MtMy0xLjM0LTMtMyAxLjM0LTMgMy0zem0wIDE0LjJjLTIuNSAwLTQuNzEtMS4yOC02LTMuMjIuMDMtMS45OSA0LTMuMDggNi0zLjA4czUuOTcgMS4wOSA2IDMuMDhjLTEuMjkgMS45NC0zLjUgMy4yMi02IDMuMjJ6Ii8+PC9zdmc+'
     
     def get_featured_trips(self):
         return self.featured_trips.all()[:3]  # Limit to 3 featured trips
