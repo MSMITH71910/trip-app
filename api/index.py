@@ -1,10 +1,13 @@
 import os
 import sys
+from django.core.wsgi import get_wsgi_application
 
 # Add the project root to the python path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+path = os.path.dirname(os.path.dirname(__file__))
+if path not in sys.path:
+    sys.path.append(path)
 
-from trip_planner.wsgi import application
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trip_planner.settings')
 
-# This variable name is important for Vercel
+application = get_wsgi_application()
 app = application

@@ -17,7 +17,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-m+p2-=#$(r387lto-
 
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+ALLOWED_HOSTS = ['.vercel.app', 'now.sh', 'localhost', '127.0.0.1', '*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -58,7 +58,7 @@ ROOT_URLCONF = 'trip_planner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,9 +75,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'trip_planner.wsgi.application'
 
 # Database
-# If DATABASE_URL is set (like in Vercel), use it. Otherwise, use SQLite locally.
 DATABASES = {
-    'default': env.db('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+    'default': env.db('DATABASE_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}')
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -93,12 +92,13 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Simpler WhiteNoise storage for initial deployment success
+STATICFILES_STORAGE = 'whitenoise.storage.WhiteNoiseStorage'
 
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
@@ -107,5 +107,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
     'https://*.vercel.app',
+    'https://*.now.sh',
     'https://trip-app-gules.vercel.app'
 ]
