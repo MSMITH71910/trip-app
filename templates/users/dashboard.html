@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero-section text-center">
+    <div class="container">
+        <h1>Welcome, {{ user.username }}</h1>
+        <a href="{% url 'trip_create' %}" class="btn btn-light">New Trip</a>
+    </div>
+</div>
+<div class="container mt-5">
+    <div class="row">
+        {% for trip in trips %}
+            <div class="col-md-4">
+                <div class="card p-3">
+                    <h3>{{ trip.title }}</h3>
+                    <p>{{ trip.destination }}</p>
+                    <a href="{% url 'trip_detail' trip.id %}" class="btn btn-primary">Details</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="purple-text">{{ trip.title }}</h1>
+    <p>{{ trip.description }}</p>
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Itinerary</h3>
+            {% for item in trip.itinerary_items.all %}
+                <div class="card p-2 mb-2">{{ item.date }}: {{ item.activity }}</div>
+            {% endfor %}
+            <form action="{% url 'itinerary_create' trip.id %}" method="post" class="mt-3">
+                {% csrf_token %}
+                <input type="date" name="date" required>
+                <input type="text" name="activity" placeholder="Activity" required>
+                <button type="submit" class="btn btn-sm btn-primary">Add</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <h3>Budget ($ {{ total_cost }})</h3>
+            <form action="{% url 'expense_create' trip.id %}" method="post">
+                {% csrf_token %}
+                <input type="number" name="amount" placeholder="Amount" required>
+                <input type="text" name="description" placeholder="Description" required>
+                <input type="hidden" name="date" value="{{ trip.start_date|date:'Y-m-d' }}">
+                <input type="hidden" name="category" value="other">
+                <button type="submit" class="btn btn-sm btn-primary">Add Expense</button>
+            </form>
+            <hr>
+            <h3>Photos</h3>
+            <form action="{% url 'photo_upload' trip.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="image" required>
+                <button type="submit" class="btn btn-sm btn-primary">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
