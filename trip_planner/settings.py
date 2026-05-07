@@ -15,7 +15,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-m+p2-=#$(r387lto-947g#hb+3t!)+3(vbfrkpt44@qbc+ep$2')
 
-DEBUG = env('DEBUG')
+DEBUG = True # env('DEBUG')
 
 ALLOWED_HOSTS = ['.vercel.app', 'now.sh', 'localhost', '127.0.0.1', '*']
 
