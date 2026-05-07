@@ -145,42 +145,47 @@ def logout_view(request):
 @login_required
 def profile(request):
     """User profile view showing user's trips."""
-    trips = Trip.objects.filter(user=request.user)
-    
-    # Get or create user profile
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-    
-    # Handle profile photo update
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            try:
-                form.save()
-                messages.success(request, 'Profile updated successfully!')
-                return redirect('trip:profile')
-            except Exception as e:
-                print(f"Error saving profile: {str(e)}")
-                error_msg = str(e).lower()
-                if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
-                    # Graceful fallback: save everything except the image
-                    # Update fields directly on the object to avoid storage interaction
-                    for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
-                        if field in request.POST:
-                            setattr(profile, field, request.POST[field])
-                    profile.save()
-                    
-                    messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+    try:
+        trips = Trip.objects.filter(user=request.user)
+        
+        # Get or create user profile
+        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        
+        # Handle profile photo update
+        if request.method == 'POST':
+            form = UserProfileForm(request.POST, request.FILES, instance=profile)
+            if form.is_valid():
+                try:
+                    form.save()
+                    messages.success(request, 'Profile updated successfully!')
                     return redirect('trip:profile')
-                
-                messages.error(request, f"An error occurred: {str(e)}")
-    else:
-        form = UserProfileForm(instance=profile)
-    
-    return render(request, 'trip/profile.html', {
-        'trips': trips,
-        'profile': profile,
-        'form': form
-    })
+                except Exception as e:
+                    print(f"Error saving profile: {str(e)}")
+                    error_msg = str(e).lower()
+                    if isinstance(e, OSError) or "read-only" in error_msg or "permission denied" in error_msg:
+                        # Graceful fallback: save everything except the image
+                        # Update fields directly on the object to avoid storage interaction
+                        for field in ['bio', 'location', 'website', 'social_instagram', 'social_twitter', 'social_facebook']:
+                            if field in request.POST:
+                                setattr(profile, field, request.POST[field])
+                        profile.save()
+                        
+                        messages.warning(request, "Changes saved, but your photo couldn't be uploaded. (Cloudinary storage not configured)")
+                        return redirect('trip:profile')
+                    
+                    messages.error(request, f"An error occurred: {str(e)}")
+        else:
+            form = UserProfileForm(instance=profile)
+        
+        return render(request, 'trip/profile.html', {
+            'trips': trips,
+            'profile': profile,
+            'form': form
+        })
+    except Exception as e:
+        print(f"FATAL ERROR in profile: {str(e)}")
+        messages.error(request, "A technical issue occurred. Please try again.")
+        return redirect('trip:index')
 
 @login_required
 def trip_new(request):
@@ -203,6 +208,8 @@ def trip_new(request):
                     for field in ['title', 'description', 'start_date', 'end_date']:
                         if field in request.POST:
                             setattr(trip, field, request.POST[field])
+                    
+                    # Direct save to bypass any potential directory creation in Storage
                     trip.save()
                     
                     messages.warning(request, "Trip created, but your cover photo couldn't be uploaded. (Cloudinary storage not configured)")
@@ -773,8 +780,8 @@ def edit_portfolio(request):
         error_details = traceback.format_exc()
         print(f"FATAL ERROR in edit_portfolio: {error_details}")
         # Simply show a generic error to the user and stay on the page instead of potentially loop-redirecting
-        messages.error(request, "A technical issue occurred while loading this page. Please try again.")
-        return redirect('trip:profile')
+        messages.error(request, "A technical issue occurred. Please try again.")
+        return redirect('trip:index')
 
 @login_required
 def user_settings(request):
