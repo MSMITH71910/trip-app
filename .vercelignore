@@ -23,7 +23,7 @@ coverage.xml
 # Local development
 .env
 db.sqlite3
-*.sqlite3
+# Keep db_template.sqlite3!
 
 # IDE
 .vscode/
