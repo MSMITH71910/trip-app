@@ -16,8 +16,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-m+p2-=#$(r387lto-947g#hb+3t!)+3(vbfrkpt44@qbc+ep$2')
 
-# Set DEBUG to False as requested
-DEBUG = False
+# Set DEBUG to True for debugging the 500 error
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
