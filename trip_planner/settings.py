@@ -147,6 +147,10 @@ STORAGES = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_COOKIE_HTTPONLY = True
 
+# Increase upload limit (Vercel max for Hobby is 4.5MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
+
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -30,7 +30,10 @@
             <h3>Photos</h3>
             <form action="{% url 'photo_upload' trip.id %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="file" name="image" required>
+                <div class="mb-2">
+                    <input type="file" name="image" class="form-control form-control-sm" required>
+                    <small class="text-muted">Max size: 4.5MB (Vercel limit)</small>
+                </div>
                 <button type="submit" class="btn btn-sm btn-primary">Upload</button>
             </form>
         </div>
