@@ -1,6 +1,5 @@
 import os
 import sys
-import sqlite3
 import time
 from django.core.wsgi import get_wsgi_application
 from django.core.management import call_command
@@ -15,51 +14,20 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trip_planner.settings')
 def initialize_db():
     if not os.environ.get('DATABASE_URL') and not os.environ.get('POSTGRES_URL'):
         db_path = '/tmp/db.sqlite3'
-        lock_path = '/tmp/db.lock'
         
-        # Simple file-based lock to prevent concurrent migrations
-        if os.path.exists(lock_path) and (time.time() - os.path.getmtime(lock_path) < 30):
-            print("Database is being initialized by another instance, waiting...")
-            time.sleep(2)
-            return
+        # If it doesn't exist, migrate with retries
+        if not os.path.exists(db_path):
+            print("Initializing database...")
+            for i in range(3):
+                try:
+                    call_command('migrate', '--noinput')
+                    print("Migration successful.")
+                    break
+                except Exception as e:
+                    print(f"Migration attempt {i+1} failed: {e}")
+                    time.sleep(1)
 
-        try:
-            # Create lock
-            with open(lock_path, 'w') as f:
-                f.write(str(os.getpid()))
-
-            db_exists = os.path.exists(db_path)
-            
-            # Ensure the file exists
-            if not db_exists:
-                with open(db_path, 'a'):
-                    os.utime(db_path, None)
-
-            # Check if schema is actually there
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            try:
-                cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='users_user'")
-                table_exists = cursor.fetchone()[0] > 0
-            except:
-                table_exists = False
-            conn.close()
-
-            if not table_exists:
-                print("Running migrations...")
-                call_command('migrate', '--noinput')
-                print("Migrations complete.")
-            
-            # Remove lock
-            if os.path.exists(lock_path):
-                os.remove(lock_path)
-                
-        except Exception as e:
-            print(f"Database initialization error: {e}")
-            if os.path.exists(lock_path):
-                os.remove(lock_path)
-
-# Initialize before app starts
+# Run initialization
 initialize_db()
 
 # Prevent writes on login

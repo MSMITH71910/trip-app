@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'django_cleanup.apps.CleanupConfig',
     'django_bootstrap5',
+    'bootstrap5',
     'users',
     'trips',
     'itineraries',
