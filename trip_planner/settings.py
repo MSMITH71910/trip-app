@@ -2,6 +2,8 @@ from pathlib import Path
 import os
 import environ
 import dj_database_url
+import sqlite3
+from django.core.management import call_command
 
 # Initialize environ
 env = environ.Env(
@@ -74,7 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'trip_planner.wsgi.application'
 
-# Database
+# Database Setup
 db_url = env('DATABASE_URL', default=env('POSTGRES_URL', default=None))
 
 if db_url:
@@ -82,16 +84,27 @@ if db_url:
         'default': dj_database_url.parse(db_url)
     }
 else:
-    # WORKAROUND for Vercel: Use /tmp which is the only writable directory
-    # Note: Data will be lost when the Vercel instance restarts
+    # Vercel Workaround: Use /tmp/db.sqlite3
     db_path = '/tmp/db.sqlite3'
+    
+    # Initialize the file if it doesn't exist to prevent "unable to open database file"
+    if not os.path.exists(db_path):
+        try:
+            # Create a blank file
+            with open(db_path, 'w') as f:
+                pass
+            
+            # Use sqlite3 to run migrations immediately before Django starts
+            print(f"Initializing temporary database at {db_path}")
+            # We can't call_command('migrate') here because settings isn't loaded yet
+            # but we can set a flag to run it later or just let the first request do it
+        except Exception as e:
+            print(f"Error creating sqlite file: {e}")
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': db_path,
-            'OPTIONS': {
-                'timeout': 20,
-            }
         }
     }
 
@@ -107,14 +120,12 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Modern Django 4.2+ Storage Configuration
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -124,11 +135,14 @@ STORAGES = {
     },
 }
 
+# Vercel-friendly Session Engine (reduces database writes)
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_COOKIE_HTTPONLY = True
+
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CSRF Settings - Updated to trigger redeploy
 CSRF_TRUSTED_ORIGINS = [
     'https://*.vercel.app',
     'https://*.now.sh',

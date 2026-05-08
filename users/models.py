@@ -4,9 +4,10 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     THEME_CHOICES = [('light', 'Light'), ('dark', 'Dark'), ('auto', 'Auto')]
     PRIVACY_CHOICES = [('public', 'Public'), ('registered', 'Registered Users'), ('private', 'Private')]
-    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    location = models.CharField(max_length=100, blank=True)
+    home_town = models.CharField(max_length=100, blank=True)
+    travel_stamp_count = models.IntegerField(default=0)
     instagram_url = models.URLField(max_length=200, blank=True)
     twitter_url = models.URLField(max_length=200, blank=True)
     facebook_url = models.URLField(max_length=200, blank=True)

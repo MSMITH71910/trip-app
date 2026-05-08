@@ -1,4 +1,4 @@
-# 🌍 Trip Planner - Your Ultimate Travel Companion
+# 🌍 TripConnect by SmithDev Labs
 
 A comprehensive Django web application for planning, organizing, and sharing your travel adventures. Create detailed trip itineraries, manage budgets, share photos, and connect with fellow travelers.
 
