@@ -20,12 +20,10 @@ var/
 .installed.cfg
 *.egg
 
-# Django
-*.log
-*.pot
-*.pyc
-local_settings.py
-media
+# Database
+db.sqlite3
+*.sqlite3
+!db_template.sqlite3
 
 # Replit specific
 .replit
