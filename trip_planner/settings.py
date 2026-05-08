@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 import environ
 import dj_database_url
-# from django.core.management import call_command
+import shutil
 
 # Initialize environ
 env = environ.Env(
@@ -16,7 +16,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-m+p2-=#$(r387lto-947g#hb+3t!)+3(vbfrkpt44@qbc+ep$2')
 
-DEBUG = env('DEBUG', default=True)
+# Set DEBUG to False as requested
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -82,13 +83,37 @@ if db_url:
         'default': dj_database_url.parse(db_url)
     }
 else:
-    # Vercel Workaround: Use /tmp/db.sqlite3 (initialized in index.py)
+    # Vercel Workaround: Use /tmp/db.sqlite3
+    db_path = '/tmp/db.sqlite3'
+    template_db = os.path.join(BASE_DIR, 'db_template.sqlite3')
+    
+    # Initialize the file if it doesn't exist in /tmp
+    if not os.path.exists(db_path):
+        try:
+            if os.path.exists(template_db):
+                shutil.copy2(template_db, db_path)
+                os.chmod(db_path, 0o666)
+            else:
+                # Create empty file
+                with open(db_path, 'w') as f:
+                    pass
+        except Exception as e:
+            print(f"Error initializing sqlite file: {e}")
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/tmp/db.sqlite3',
+            'NAME': db_path,
         }
     }
+
+# Disconnect last_login to prevent DB writes on login for SQLite stability
+try:
+    from django.contrib.auth.models import update_last_login
+    from django.contrib.auth.signals import user_logged_in
+    user_logged_in.disconnect(update_last_login)
+except:
+    pass
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -117,7 +142,7 @@ STORAGES = {
     },
 }
 
-# Vercel-friendly Session Engine (reduces database writes)
+# Vercel-friendly Session Engine
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_COOKIE_HTTPONLY = True
 
@@ -125,7 +150,6 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
     'https://*.vercel.app',
     'https://*.now.sh',

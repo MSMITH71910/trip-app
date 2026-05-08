@@ -2,8 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.py",
-      "use": "@vercel/python"
+      "src": "trip_planner/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
@@ -13,7 +16,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "index.py"
+      "dest": "trip_planner/wsgi.py"
     }
   ]
 }

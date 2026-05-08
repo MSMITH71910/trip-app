@@ -14,7 +14,7 @@ def initialize_db():
     try:
         if not os.environ.get('DATABASE_URL') and not os.environ.get('POSTGRES_URL'):
             db_path = '/tmp/db.sqlite3'
-            template_db = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
+            template_db = os.path.join(os.path.dirname(__file__), 'db_template.sqlite3')
             
             if not os.path.exists(db_path):
                 if os.path.exists(template_db):
