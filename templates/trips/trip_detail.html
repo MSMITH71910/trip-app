@@ -1,13 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container py-5">
-    <h1 class="purple-text">{{ trip.title }}</h1>
+    <div class="d-flex align-items-center mb-4">
+        {% if trip.trip_photo %}
+            <img src="{{ trip.trip_photo.url }}" class="rounded-3 me-3" style="width: 100px; height: 100px; object-fit: cover;">
+        {% endif %}
+        <div>
+            <h1 class="purple-text mb-0">{{ trip.title }}</h1>
+            <p class="text-muted">{{ trip.destination }} | {{ trip.start_date }} - {{ trip.end_date }}</p>
+        </div>
+    </div>
     <p>{{ trip.description }}</p>
+
     <div class="row">
         <div class="col-md-8">
             <h3>Itinerary</h3>
             {% for item in trip.itinerary_items.all %}
                 <div class="card p-2 mb-2">{{ item.date }}: {{ item.activity }}</div>
+            {% empty %}
+                <p class="text-muted italic">No itinerary items yet.</p>
             {% endfor %}
             <form action="{% url 'itinerary_create' trip.id %}" method="post" class="mt-3">
                 {% csrf_token %}
@@ -15,6 +26,26 @@
                 <input type="text" name="activity" placeholder="Activity" required>
                 <button type="submit" class="btn btn-sm btn-primary">Add</button>
             </form>
+
+            <h3 class="mt-5">Photo Gallery</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                {% for photo in trip.photos.all %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <a href="{% url 'photo_detail' photo.id %}">
+                                <img src="{{ photo.image.url }}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                            </a>
+                            {% if photo.caption %}
+                                <div class="card-body p-2">
+                                    <p class="card-text small">{{ photo.caption }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12"><p class="text-muted italic">No photos shared yet.</p></div>
+                {% endfor %}
+            </div>
         </div>
         <div class="col-md-4">
             <h3>Budget ($ {{ total_cost }})</h3>
@@ -31,7 +62,8 @@
             <form action="{% url 'photo_upload' trip.id %}" method="post" enctype="multipart/form-data" id="uploadForm">
                 {% csrf_token %}
                 <div class="mb-2">
-                    <input type="file" name="image" id="id_image" class="form-control form-control-sm" required onchange="checkFileSize(this)">
+                    <input type="file" name="image" id="id_image" class="form-control form-control-sm mb-1" required onchange="checkFileSize(this)">
+                    <input type="text" name="caption" class="form-control form-control-sm" placeholder="Add a caption (optional)">
                     <small class="text-muted" id="fileHelp">Max size: 4.5MB (Vercel limit)</small>
                 </div>
                 <button type="submit" id="uploadBtn" class="btn btn-sm btn-primary">Upload</button>
