@@ -76,18 +76,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'trip_planner.wsgi.application'
 
 # Database Setup
-db_url = env('DATABASE_URL', default=env('POSTGRES_URL', default=None))
+# If DATABASE_URL is set (e.g. Postgres on Vercel), it uses that.
+# Otherwise, it falls back to SQLite in /tmp for serverless persistence.
+import dj_database_url
 
-if db_url:
-    DATABASES = {
-        'default': dj_database_url.parse(db_url)
-    }
-else:
-    # Vercel Workaround: Use /tmp/db.sqlite3
+DATABASES = {
+    'default': dj_database_url.config(
+        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+
+# SQLite Vercel Workaround: Redirect to /tmp at runtime if using SQLite
+if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
     db_path = '/tmp/db.sqlite3'
     template_db = os.path.join(BASE_DIR, 'db_template.sqlite3')
     
-    # Initialize the file if it doesn't exist in /tmp
     if not os.path.exists(db_path):
         try:
             if os.path.exists(template_db):
@@ -99,13 +104,9 @@ else:
                     pass
         except Exception as e:
             print(f"Error initializing sqlite file: {e}")
+            
+    DATABASES['default']['NAME'] = db_path
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': db_path,
-        }
-    }
 
 # Disconnect last_login to prevent DB writes on login for SQLite stability
 try:
