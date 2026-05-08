@@ -16,8 +16,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-m+p2-=#$(r387lto-947g#hb+3t!)+3(vbfrkpt44@qbc+ep$2')
 
-# Set DEBUG to True temporarily to find out why "its not working"
-DEBUG = True
+# Set DEBUG to False for production
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 

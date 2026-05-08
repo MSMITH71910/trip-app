@@ -28,14 +28,32 @@
             </form>
             <hr>
             <h3>Photos</h3>
-            <form action="{% url 'photo_upload' trip.id %}" method="post" enctype="multipart/form-data">
+            <form action="{% url 'photo_upload' trip.id %}" method="post" enctype="multipart/form-data" id="uploadForm">
                 {% csrf_token %}
                 <div class="mb-2">
-                    <input type="file" name="image" class="form-control form-control-sm" required>
-                    <small class="text-muted">Max size: 4.5MB (Vercel limit)</small>
+                    <input type="file" name="image" id="id_image" class="form-control form-control-sm" required onchange="checkFileSize(this)">
+                    <small class="text-muted" id="fileHelp">Max size: 4.5MB (Vercel limit)</small>
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary">Upload</button>
+                <button type="submit" id="uploadBtn" class="btn btn-sm btn-primary">Upload</button>
             </form>
+
+            <script>
+            function checkFileSize(input) {
+                const max = 4.5 * 1024 * 1024; // 4.5MB
+                const help = document.getElementById('fileHelp');
+                const btn = document.getElementById('uploadBtn');
+                
+                if (input.files && input.files[0]) {
+                    if (input.files[0].size > max) {
+                        help.innerHTML = '<span class="text-danger">Error: File too large (' + (input.files[0].size / (1024*1024)).toFixed(2) + 'MB). Must be under 4.5MB.</span>';
+                        btn.disabled = true;
+                    } else {
+                        help.innerHTML = 'Max size: 4.5MB (Vercel limit)';
+                        btn.disabled = false;
+                    }
+                }
+            }
+            </script>
         </div>
     </div>
 </div>
