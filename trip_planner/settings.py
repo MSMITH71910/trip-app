@@ -2,8 +2,7 @@ from pathlib import Path
 import os
 import environ
 import dj_database_url
-import sqlite3
-from django.core.management import call_command
+# from django.core.management import call_command
 
 # Initialize environ
 env = environ.Env(
@@ -32,8 +31,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_cleanup.apps.CleanupConfig',
-    'django_bootstrap5',
-    'bootstrap5',
     'users',
     'trips',
     'itineraries',
@@ -85,27 +82,11 @@ if db_url:
         'default': dj_database_url.parse(db_url)
     }
 else:
-    # Vercel Workaround: Use /tmp/db.sqlite3
-    db_path = '/tmp/db.sqlite3'
-    
-    # Initialize the file if it doesn't exist to prevent "unable to open database file"
-    if not os.path.exists(db_path):
-        try:
-            # Create a blank file
-            with open(db_path, 'w') as f:
-                pass
-            
-            # Use sqlite3 to run migrations immediately before Django starts
-            print(f"Initializing temporary database at {db_path}")
-            # We can't call_command('migrate') here because settings isn't loaded yet
-            # but we can set a flag to run it later or just let the first request do it
-        except Exception as e:
-            print(f"Error creating sqlite file: {e}")
-
+    # Vercel Workaround: Use /tmp/db.sqlite3 (initialized in index.py)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': db_path,
+            'NAME': '/tmp/db.sqlite3',
         }
     }
 

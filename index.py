@@ -11,28 +11,28 @@ if path not in sys.path:
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trip_planner.settings')
 
 def initialize_db():
-    if not os.environ.get('DATABASE_URL') and not os.environ.get('POSTGRES_URL'):
-        db_path = '/tmp/db.sqlite3'
-        template_db = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
-        
-        # Always check if /tmp/db.sqlite3 exists, if not, copy the template
-        if not os.path.exists(db_path):
-            print(f"Initializing database at {db_path}...")
-            if os.path.exists(template_db):
-                try:
+    try:
+        if not os.environ.get('DATABASE_URL') and not os.environ.get('POSTGRES_URL'):
+            db_path = '/tmp/db.sqlite3'
+            template_db = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
+            
+            if not os.path.exists(db_path):
+                if os.path.exists(template_db):
                     shutil.copy2(template_db, db_path)
-                    # Ensure it's writable
                     os.chmod(db_path, 0o666)
-                    print("Database template copied successfully.")
-                except Exception as e:
-                    print(f"Error copying template database: {e}")
-            else:
-                print("No template database found in repository.")
+                else:
+                    # Fallback: create empty file
+                    with open(db_path, 'w') as f:
+                        pass
+                    from django.core.management import call_command
+                    call_command('migrate', '--noinput')
+    except Exception as e:
+        print(f"DB Init Error: {e}")
 
 # Run initialization
 initialize_db()
 
-# Prevent writes on login
+# Prevent writes on login (critical for serverless SQLite)
 try:
     from django.contrib.auth.models import update_last_login
     from django.contrib.auth.signals import user_logged_in
