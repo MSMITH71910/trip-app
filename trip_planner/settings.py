@@ -16,8 +16,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='django-insecure-m+p2-=#$(r387lto-947g#hb+3t!)+3(vbfrkpt44@qbc+ep$2')
 
-# Set DEBUG to False for production
-DEBUG = False
+# Set DEBUG to True temporarily to find out why "its not working"
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -131,8 +131,20 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Media Files - On Vercel, we use /tmp for ephemeral storage
+if env('VERCEL', default=False):
+    MEDIA_ROOT = '/tmp/media'
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Ensure /tmp/media exists
+if not os.path.exists(MEDIA_ROOT):
+    try:
+        os.makedirs(MEDIA_ROOT, exist_ok=True)
+    except:
+        pass
 
 STORAGES = {
     "default": {
