@@ -1,8 +1,7 @@
 import os
 import sys
-import time
+import shutil
 from django.core.wsgi import get_wsgi_application
-from django.core.management import call_command
 
 # Add the project root to the python path
 path = os.path.dirname(os.path.dirname(__file__))
@@ -14,18 +13,21 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trip_planner.settings')
 def initialize_db():
     if not os.environ.get('DATABASE_URL') and not os.environ.get('POSTGRES_URL'):
         db_path = '/tmp/db.sqlite3'
+        template_db = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
         
-        # If it doesn't exist, migrate with retries
+        # Always check if /tmp/db.sqlite3 exists, if not, copy the template
         if not os.path.exists(db_path):
-            print("Initializing database...")
-            for i in range(3):
+            print(f"Initializing database at {db_path}...")
+            if os.path.exists(template_db):
                 try:
-                    call_command('migrate', '--noinput')
-                    print("Migration successful.")
-                    break
+                    shutil.copy2(template_db, db_path)
+                    # Ensure it's writable
+                    os.chmod(db_path, 0o666)
+                    print("Database template copied successfully.")
                 except Exception as e:
-                    print(f"Migration attempt {i+1} failed: {e}")
-                    time.sleep(1)
+                    print(f"Error copying template database: {e}")
+            else:
+                print("No template database found in repository.")
 
 # Run initialization
 initialize_db()
